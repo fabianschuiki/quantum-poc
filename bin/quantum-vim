@@ -1,0 +1,44 @@
+#!/usr/bin/php
+<?php
+/* Copyright © 2013 Fabian Schuiki */
+require_once __DIR__."/../source/autoload.php";
+
+//Get the path to the information quantum the user wants to edit.
+if ($argc < 2) {
+	echo "usage: {$argv[0]} INFO_QUANTUM\n";
+	exit;
+}
+$path = $argv[1];
+
+//Connect to the quantum server.
+$socketPath = "/tmp/quantum.sock";
+$socket = fsockopen("unix://$socketPath") or die ("Unable to connect to $socketPath.\n");
+
+//Setup an IQ change callback that sends altered information objects back to the server.
+Information\Quantum::$changeCallback = function (Information\Quantum $quantum) use ($socket) {
+	$request = new stdClass;
+	$request->type = "SET";
+	$request->payload = $quantum;
+	fwrite($socket, serialize($request));
+};
+
+//Request the information object.
+$request = new stdClass;
+$request->type = "GET";
+$request->path = $path;
+fwrite($socket, serialize($request));
+
+//Wait for the response.
+$responseRaw = fread($socket, 1024);
+$response = unserialize($responseRaw);
+if ($response->type === "FAIL") {
+	die("Quantum Server: {$response->message}\n");
+}
+$iq = $response->payload;
+echo "Received: $iq\n";
+
+//Edit the information quantum.
+$tmpFile = "/tmp/information_quantum";
+file_put_contents($tmpFile, $iq->getString());
+passthru("vim ".escapeshellarg($tmpFile));
+$iq->setString(file_get_contents($tmpFile));

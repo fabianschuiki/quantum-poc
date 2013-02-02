@@ -1,0 +1,7 @@
+#!/usr/bin/php
+<?php
+/* Copyright © 2013 Fabian Schuiki */
+require_once __DIR__."/../source/autoload.php";
+
+$server = new Server ("/tmp/quantum.sock");
+$server->run();
