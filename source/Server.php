@@ -14,6 +14,7 @@ class Server
 
 	protected $quanta;
 	protected $quantumId;
+	protected $casters;
 
 	public function __construct($socketPath)
 	{
@@ -21,6 +22,7 @@ class Server
 		$this->clients = array();
 		$this->quanta = array();
 		$this->quantumId = 1;
+		$this->casters = array();
 
 		//Register a default information quantum ID resolver.
 		Information\Quantum::$resolveIdCallback = array($this, "resolveQuantumId");
@@ -31,22 +33,14 @@ class Server
 
 		//Create a simple file quantum that wraps around a file on disk.
 		$file = $this->makeQuantum("Information\Container");
-		$file->setType("file/zip");
-		$file->path = "world.zip";
+		$file->setType("file");
+		$file->path = "world.txt";
+		$content = $this->makeQuantum("Information\Raw");
+		$file->setChild("content", $content);
 		$root->setChild("world", $file);
 
-		//Create a base64 coded string.
-		$base64 = $this->makeQuantum("Information\Container");
-		$base64->setType("string/base64");
-		$file->setChild("content", $base64);
-
-		//Create a simple text quantum for debugging.
-		$text = $this->makeQuantum("Information\String");
-		$text->setString("Hello World!");
-		$base64->setChild("decoded", $text);
-
-		//Initialize the whole tree by simulating a change to the file.
-		$this->notifyChangeDown($root, "world");
+		//Load the initial file contents.
+		$this->notifyChangeDown($file, "");
 	}
 
 	/** Returns the quantum with the given id. Throws an exception if the
@@ -64,7 +58,6 @@ class Server
 	public function makeQuantum($class = "Information\Quantum")
 	{
 		$iq = new $class($this->quantumId++);
-		echo "server: created IQ {$iq->getId()}\n";
 		if (isset($this->quanta[$iq->getId()])) {
 			throw new \RuntimeException ("Information quantum {$iq->getId()} already exists. This shouldn't happen.");
 		}
@@ -130,6 +123,17 @@ class Server
 				}
 				$response = new stdClass;
 				if ($child) {
+					$type = (isset($request->as) ? $request->as : $child->getType());
+					if ($type !== $child->getType()) {
+						$caster = $this->getCaster($child, $type);
+						if (!$caster) {
+							$response->type = "FAIL";
+							$response->message = "Information quantum {$request->path} doesn't exist.";
+						} else {
+							$child = $caster->getOutput();
+						}
+					}
+
 					$response->type = "QUANTUM";
 					$response->payload = $child;
 				} else {
@@ -153,7 +157,7 @@ class Server
 		}
 	}
 
-	private function notifyChange(Information\Quantum $quantum, $path)
+	private function notifyChange(Information\Quantum $quantum, $path = "")
 	{
 		echo "Upward Change: $quantum, $path\n";
 
@@ -164,8 +168,9 @@ class Server
 		}
 
 		if ($quantum->getType() === "file" && preg_match('/^content/', $path)) {
-			file_put_contents($quantum->path, $quantum->getChild("content")->getChild("encoded")->getString());
-			$this->notifyChange($quantum, "");
+			$content = $quantum->getChild("content");
+			file_put_contents($quantum->path, $content->getData());
+			$this->notifyChange($quantum);
 			return;
 		}
 
@@ -185,7 +190,7 @@ class Server
 		}
 	}
 
-	private function notifyChangeDown(Information\Quantum $quantum, $path)
+	private function notifyChangeDown(Information\Quantum $quantum, $path = "")
 	{
 		if ($path) {
 			$split = explode("/", $path, 2);
@@ -196,13 +201,11 @@ class Server
 			echo "Downward Change: $quantum\n";
 			switch ($quantum->getType()) {
 				case "file": {
-					$data = @file_get_contents($quantum->path);
-					$text = $this->makeQuantum("Information\String");
-					$text->setString($data);
-					$quantum->getChild("content")->setChild("encoded", $text);
-					$this->notifyChangeDown($quantum, "content");
+					$content = $quantum->getChild("content");
+					$content->setData(@file_get_contents($quantum->path));
+					$this->notifyChangeDown($content);
 				} break;
-				case "file/zip": {
+				/*case "file/zip": {
 					$zip = new ZipArchive;
 					$zip->open($quantum->path);
 					$data = $zip->getFromName("world.txt");
@@ -211,12 +214,38 @@ class Server
 					$text->setString($data);
 					$quantum->getChild("content")->setChild("encoded", $text);
 					$this->notifyChangeDown($quantum, "content");
-				} break;
+				} break;*/
 				case "string/base64": {
 					$quantum->getChild("decoded")->setString(base64_decode($quantum->getChild("encoded")->getString()));
 					$this->notifyChangeDown($quantum, "decoded");
 				} break;
 			}
 		}
+	}
+
+	/**
+	 * Returns a caster that converts the given quantum to the requested type.
+	 * Returns null if the cast is not possible.
+	 */
+	private function getCaster(Information\Quantum $quantum, $type)
+	{
+		$name = "{$quantum->getId()} -> $type";
+		$caster = @$this->casters[$name];
+		if (!$caster) {
+			$caster = $this->makeCaster($quantum, $type);
+			if ($caster) {
+				echo "Created Caster $name\n";
+				$this->casters[$name] = $caster;
+			}
+		}
+		return $caster;
+	}
+
+	/** Returns a caster object for that casts between the given quantum and
+	 * the requested type. Returns null if the cast is impossible. */
+	private function makeCaster(Information\Quantum $quantum, $type)
+	{
+		echo "Asked to make caster from $quantum to $type\n";
+		return null;
 	}
 }
