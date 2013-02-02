@@ -7,10 +7,11 @@ namespace Information;
  * information quanta.
  */
 
-class Quantum
+abstract class Quantum
 {
 	protected $id;
 	protected $parentId;
+	protected $name;
 
 	public function __construct($id)
 	{
@@ -19,8 +20,10 @@ class Quantum
 
 	public function __toString()
 	{
-		return get_class($this)." #{$this->id}";
+		return "<{$this->getType()} #{$this->id} \"{$this->getName()}\">";
 	}
+
+	abstract public function getType();
 
 	/** Returns the quantum's id. */
 	public function getId() { return $this->id; }
@@ -51,6 +54,20 @@ class Quantum
 	public function setParent(self $parent = null)
 	{
 		$this->setParentId($parent ? $parent->getId() : null);
+	}
+
+	/** Returns this information quantum's name. In general, if this quantum is
+	 * a child of another quantum, the name corresponds to the child name. */
+	public function getName() { return $this->name; }
+
+	/** Sets the quantum's name. You should never have to call this yourself.
+	 * Whenever the quantum is added to a container, its name is adjusted. */
+	public function setName($name)
+	{
+		if ($this->name !== $name) {
+			$this->name = $name;
+			$this->notifyChange();
+		}
 	}
 
 	/** Called by the class itself whenever the information of the quantum

@@ -10,6 +10,7 @@ namespace Information;
 class Container extends Quantum
 {
 	protected $childrenIds;
+	protected $type;
 
 	public function __construct($id)
 	{
@@ -63,7 +64,14 @@ class Container extends Quantum
 			throw new \RuntimeException("$this has been told to add child $info which already has parent {$info->getParentId()}.");
 		}
 		$info->setParent($this);
+		$info->setName($name);
 		$this->childrenIds[$name] = $info->getId();
 		$this->notifyChange();
 	}
+
+	/** Sets this container's type. */
+	public function setType($type) { $this->type = $type; }
+
+	/** Returns the type of this container. */
+	public function getType() { return $this->type; }
 }

@@ -27,11 +27,26 @@ class Server
 
 		//Initialize the root information quantum.
 		$root = $this->makeQuantum("Information\Container");
+		$root->setType("root");
+
+		//Create a simple file quantum that wraps around a file on disk.
+		$file = $this->makeQuantum("Information\Container");
+		$file->setType("file/zip");
+		$file->path = "world.zip";
+		$root->setChild("world", $file);
+
+		//Create a base64 coded string.
+		$base64 = $this->makeQuantum("Information\Container");
+		$base64->setType("string/base64");
+		$file->setChild("content", $base64);
 
 		//Create a simple text quantum for debugging.
 		$text = $this->makeQuantum("Information\String");
 		$text->setString("Hello World!");
-		$root->setChild("world", $text);
+		$base64->setChild("decoded", $text);
+
+		//Initialize the whole tree by simulating a change to the file.
+		$this->notifyChangeDown($root, "world");
 	}
 
 	/** Returns the quantum with the given id. Throws an exception if the
@@ -109,7 +124,10 @@ class Server
 		switch ($request->type) {
 			case "GET": {
 				$root = $this->quanta[1];
-				$child = $root->getChild($request->path);
+				$child = $root;
+				foreach (explode("/", $request->path) as $name) {
+					$child = $child->getChild($name);
+				}
 				$response = new stdClass;
 				if ($child) {
 					$response->type = "QUANTUM";
@@ -127,11 +145,78 @@ class Server
 					break;
 				}
 				$this->quanta[$request->payload->getId()] = $request->payload;
-				echo "Stored $request->payload\n";
+				$this->notifyChange($request->payload, "");
 			} break;
 			default: {
 				echo "Request type \"{$request->type}\" is not supported.\n";
 			} break;
+		}
+	}
+
+	private function notifyChange(Information\Quantum $quantum, $path)
+	{
+		echo "Upward Change: $quantum, $path\n";
+
+		if ($quantum->getType() === "string/base64" && $path === "decoded") {
+			$quantum->getChild("encoded")->setString(base64_encode($quantum->getChild("decoded")->getString()));
+			$this->notifyChange($quantum, "encoded");
+			return;
+		}
+
+		if ($quantum->getType() === "file" && preg_match('/^content/', $path)) {
+			file_put_contents($quantum->path, $quantum->getChild("content")->getChild("encoded")->getString());
+			$this->notifyChange($quantum, "");
+			return;
+		}
+
+		if ($quantum->getType() === "file/zip" && preg_match('/^content/', $path)) {
+			$zip = new ZipArchive;
+			$zip->open($quantum->path, ZIPARCHIVE::CREATE);
+			$zip->addFromString("world.txt", $quantum->getChild("content")->getChild("encoded")->getString());
+			$zip->close();
+			$this->notifyChange($quantum, "");
+			return;
+		}
+
+		if ($parent = $quantum->getParent()) {
+			$new_path = $quantum->getName();
+			if ($path) $new_path .= "/".$path;
+			$this->notifyChange($parent, $new_path);
+		}
+	}
+
+	private function notifyChangeDown(Information\Quantum $quantum, $path)
+	{
+		if ($path) {
+			$split = explode("/", $path, 2);
+			$name = $split[0];
+			$rest = (count($split) > 1 ? $split[1] : null);
+			$this->notifyChangeDown($quantum->getChild($name), $rest);
+		} else {
+			echo "Downward Change: $quantum\n";
+			switch ($quantum->getType()) {
+				case "file": {
+					$data = @file_get_contents($quantum->path);
+					$text = $this->makeQuantum("Information\String");
+					$text->setString($data);
+					$quantum->getChild("content")->setChild("encoded", $text);
+					$this->notifyChangeDown($quantum, "content");
+				} break;
+				case "file/zip": {
+					$zip = new ZipArchive;
+					$zip->open($quantum->path);
+					$data = $zip->getFromName("world.txt");
+					$zip->close();
+					$text = $this->makeQuantum("Information\String");
+					$text->setString($data);
+					$quantum->getChild("content")->setChild("encoded", $text);
+					$this->notifyChangeDown($quantum, "content");
+				} break;
+				case "string/base64": {
+					$quantum->getChild("decoded")->setString(base64_decode($quantum->getChild("encoded")->getString()));
+					$this->notifyChangeDown($quantum, "decoded");
+				} break;
+			}
 		}
 	}
 }

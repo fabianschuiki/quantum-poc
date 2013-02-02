@@ -18,4 +18,7 @@ class String extends Quantum
 			$this->notifyChange();
 		}
 	}
+
+	/** Returns "string". */
+	public function getType() { return "string"; }
 }
