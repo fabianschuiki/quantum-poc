@@ -2,6 +2,7 @@
 /* Copyright © 2013 Fabian Schuiki */
 namespace Caster;
 
+use Server;
 use Information\Quantum;
 
 /**
@@ -12,13 +13,16 @@ use Information\Quantum;
 
 abstract class Caster
 {
-	protected $input;
-	protected $output;
+	protected $server;
+	protected $inputId;
+	protected $outputId;
 
-	public function __construct(Quantum $input, Quantum $outpu)
+	public function __construct(Server $server, Quantum $input, Quantum $output)
 	{
-		$this->input = $input;
-		$this->output = $output;
+		$this->server = $server;
+		$this->inputId = $input->getId();
+		$this->outputId = $output->getId();
+		$output->setName($input->getName());
 
 		//Verify the input and output quantum types match.
 		if ($input->getType() !== $this->getInputType()) {
@@ -31,15 +35,27 @@ abstract class Caster
 
 	public function __toString()
 	{
-		return "{$this->input->getId()} -> {$this->getCastType()}";
+		return "{$this->getInput()} -> {$this->getOutput()}";
 	}
 
+	/** Returns the input information quantum ID. */
+	public function getInputId() { return $this->inputId; }
+
+	/** Returns the output information quantum ID. */
+	public function getOutputId() { return $this->outputId; }
+
 	/** Returns the input information quantum. */
-	public function getInput() { return $this->input; }
+	public function getInput()
+	{
+		return $this->inputId ? $this->server->resolveQuantumId($this->inputId) : null;
+	}
 
 	/** Returns the output information quantum that the caster obtained by
 	 * casting the input to the requested type. */
-	public function getOutput() { return $this->output; }
+	public function getOutput()
+	{
+		return $this->outputId ? $this->server->resolveQuantumId($this->outputId) : null;
+	}
 
 	/**
 	 * Notifies the caster that the input information quantum has changed and
@@ -47,7 +63,7 @@ abstract class Caster
 	 */
 	public function notifyInputChanged()
 	{
-		echo "Caster: Input {$this->input} changed.";
+		echo "Caster $this: Input changed.\n";
 	}
 
 	/**
@@ -56,7 +72,7 @@ abstract class Caster
 	 */
 	public function notifyOutputChanged()
 	{
-		echo "Caster: Output {$this->output} changed.";
+		echo "Caster $this: Output changed.\n";
 	}
 
 	/** Returns the type of the input information quantum this caster requires. */

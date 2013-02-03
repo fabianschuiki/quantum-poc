@@ -26,6 +26,7 @@ Information\Quantum::$changeCallback = function (Information\Quantum $quantum) u
 $request = new stdClass;
 $request->type = "GET";
 $request->path = $path;
+$request->as = "string";
 fwrite($socket, serialize($request));
 
 //Wait for the response.

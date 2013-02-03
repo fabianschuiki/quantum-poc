@@ -41,6 +41,9 @@ class Server
 
 		//Load the initial file contents.
 		$this->notifyChangeDown($file, "");
+
+		//Register the information quantum change callback.
+		Information\Quantum::$changeCallback = array($this, "notifyQuantumChanged");
 	}
 
 	/** Returns the quantum with the given id. Throws an exception if the
@@ -128,14 +131,16 @@ class Server
 						$caster = $this->getCaster($child, $type);
 						if (!$caster) {
 							$response->type = "FAIL";
-							$response->message = "Information quantum {$request->path} doesn't exist.";
+							$response->message = "Information quantum {$request->path} of type {$child->getType()} cannot be converted to {$request->as}.";
+							$child = null;
 						} else {
 							$child = $caster->getOutput();
 						}
 					}
-
-					$response->type = "QUANTUM";
-					$response->payload = $child;
+					if ($child) {
+						$response->type = "QUANTUM";
+						$response->payload = $child;
+					}
 				} else {
 					$response->type = "FAIL";
 					$response->message = "Information quantum {$request->path} doesn't exist.";
@@ -161,11 +166,11 @@ class Server
 	{
 		echo "Upward Change: $quantum, $path\n";
 
-		if ($quantum->getType() === "string/base64" && $path === "decoded") {
+		/*if ($quantum->getType() === "string/base64" && $path === "decoded") {
 			$quantum->getChild("encoded")->setString(base64_encode($quantum->getChild("decoded")->getString()));
 			$this->notifyChange($quantum, "encoded");
 			return;
-		}
+		}*/
 
 		if ($quantum->getType() === "file" && preg_match('/^content/', $path)) {
 			$content = $quantum->getChild("content");
@@ -174,13 +179,18 @@ class Server
 			return;
 		}
 
-		if ($quantum->getType() === "file/zip" && preg_match('/^content/', $path)) {
+		/*if ($quantum->getType() === "file/zip" && preg_match('/^content/', $path)) {
 			$zip = new ZipArchive;
 			$zip->open($quantum->path, ZIPARCHIVE::CREATE);
 			$zip->addFromString("world.txt", $quantum->getChild("content")->getChild("encoded")->getString());
 			$zip->close();
 			$this->notifyChange($quantum, "");
 			return;
+		}*/
+
+		//Check whether there is a caster that might be interested about this change.
+		foreach ($this->casters as $name => $caster) {
+			if ($caster->getOutput()->getId() == $quantum->getId()) $caster->notifyOutputChanged();
 		}
 
 		if ($parent = $quantum->getParent()) {
@@ -192,7 +202,7 @@ class Server
 
 	private function notifyChangeDown(Information\Quantum $quantum, $path = "")
 	{
-		if ($path) {
+		if (strlen($path)) {
 			$split = explode("/", $path, 2);
 			$name = $split[0];
 			$rest = (count($split) > 1 ? $split[1] : null);
@@ -214,10 +224,16 @@ class Server
 					$text->setString($data);
 					$quantum->getChild("content")->setChild("encoded", $text);
 					$this->notifyChangeDown($quantum, "content");
-				} break;*/
+				} break;
 				case "string/base64": {
 					$quantum->getChild("decoded")->setString(base64_decode($quantum->getChild("encoded")->getString()));
 					$this->notifyChangeDown($quantum, "decoded");
+				} break;*/
+				default: {
+					//Look for casters that might be interested about this change.
+					foreach ($this->casters as $name => $caster) {
+						if ($caster->getInput()->getId() == $quantum->getId()) $caster->notifyInputChanged();
+					}
 				} break;
 			}
 		}
@@ -236,6 +252,7 @@ class Server
 			if ($caster) {
 				echo "Created Caster $name\n";
 				$this->casters[$name] = $caster;
+				$caster->notifyInputChanged();
 			}
 		}
 		return $caster;
@@ -246,6 +263,14 @@ class Server
 	private function makeCaster(Information\Quantum $quantum, $type)
 	{
 		echo "Asked to make caster from $quantum to $type\n";
+		if ($quantum->getType() === "raw" && $type === "string") {
+			return new Caster\RawToString($this, $quantum);
+		}
 		return null;
+	}
+
+	public function notifyQuantumChanged(Information\Quantum $quantum)
+	{
+		$this->notifyChange($quantum);
 	}
 }
