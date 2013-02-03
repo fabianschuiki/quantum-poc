@@ -15,6 +15,7 @@ class Server
 	protected $quanta;
 	protected $quantumId;
 	protected $casters;
+	protected $editorStack;
 
 	public function __construct($socketPath)
 	{
@@ -23,6 +24,7 @@ class Server
 		$this->quanta = array();
 		$this->quantumId = 1;
 		$this->casters = array();
+		$this->editorStack = array();
 
 		//Register a default information quantum ID resolver.
 		Information\Quantum::$resolveIdCallback = array($this, "resolveQuantumId");
@@ -154,7 +156,9 @@ class Server
 					break;
 				}
 				$this->quanta[$request->payload->getId()] = $request->payload;
+				$this->pushEditor($client);
 				$this->notifyChange($request->payload, "");
+				$this->popEditor($client);
 			} break;
 			default: {
 				echo "Request type \"{$request->type}\" is not supported.\n";
@@ -190,7 +194,12 @@ class Server
 
 		//Check whether there is a caster that might be interested about this change.
 		foreach ($this->casters as $name => $caster) {
-			if ($caster->getOutput()->getId() == $quantum->getId()) $caster->notifyOutputChanged();
+			if (in_array($caster, $this->editorStack, true)) continue;
+			if ($caster->getOutput()->getId() == $quantum->getId()) {
+				$this->pushEditor($caster);
+				$caster->notifyOutputChanged();
+				$this->popEditor($caster);
+			}
 		}
 
 		if ($parent = $quantum->getParent()) {
@@ -232,7 +241,12 @@ class Server
 				default: {
 					//Look for casters that might be interested about this change.
 					foreach ($this->casters as $name => $caster) {
-						if ($caster->getInput()->getId() == $quantum->getId()) $caster->notifyInputChanged();
+						if (in_array($caster, $this->editorStack, true)) continue;
+						if ($caster->getInput()->getId() == $quantum->getId()) {
+							$this->pushEditor($caster);
+							$caster->notifyInputChanged();
+							$this->popEditor($caster);
+						}
 					}
 				} break;
 			}
@@ -252,7 +266,9 @@ class Server
 			if ($caster) {
 				echo "Created Caster $name\n";
 				$this->casters[$name] = $caster;
+				$this->pushEditor($caster);
 				$caster->notifyInputChanged();
+				$this->popEditor($caster);
 			}
 		}
 		return $caster;
@@ -272,5 +288,14 @@ class Server
 	public function notifyQuantumChanged(Information\Quantum $quantum)
 	{
 		$this->notifyChange($quantum);
+	}
+
+	public function pushEditor($editor) { array_push($this->editorStack, $editor); }
+	public function popEditor($editor)
+	{
+		$e = array_pop($this->editorStack);
+		if ($e !== $editor) {
+			throw new \InvalidArgumentException("Trying to pop editor ".var_export($editor).", yet ".var_export($e)." was on the stack.");
+		}
 	}
 }
