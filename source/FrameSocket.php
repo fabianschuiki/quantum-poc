@@ -42,7 +42,10 @@ class FrameSocket
 	public function read()
 	{
 		//Read some data into the buffer.
-		$this->buffer .= socket_read($this->socket, 1024*1024);
+		$read = socket_read($this->socket, 1024*1024);
+		if ($read) {
+			$this->buffer .= $read;
+		}
 
 		//Only consider the buffer for further operations if it contains at
 		//least enough data for the header.
@@ -67,6 +70,8 @@ class FrameSocket
 				break;
 			}
 		}
+
+		return $read != null;
 	}
 
 	/** Causes the socket to write any frames in the queue. */

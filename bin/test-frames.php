@@ -46,8 +46,10 @@ while (true) {
 	});
 
 	while (!$done) {
-		$fs->read();
+		echo "Waiting for data...\n";
+		if (!$fs->read()) break;
 	}
 
+	echo "Client disconnected\n";
 	socket_close($client);
 }
