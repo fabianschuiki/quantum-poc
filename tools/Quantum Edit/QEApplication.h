@@ -16,9 +16,17 @@
 	IBOutlet NSTextField *quantumPath;
 	NSFileHandle *server;
 	NSMutableData *serverBuffer;
+	NSMutableSet *editors;
+	
+	NSInteger requestID;
 }
 
 - (IBAction)openQuantum:(id)sender;
 - (void)receivedFromServer:(NSNotification *)notification;
+
+- (NSInteger)requestQuantumWithPath:(NSString *)path;
+
+- (QEFrame *)encodeAsFrame:(id)object;
+- (id)decodeFromFrame:(QEFrame *)frame;
 
 @end

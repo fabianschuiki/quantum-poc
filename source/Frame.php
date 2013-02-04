@@ -12,7 +12,11 @@ class Frame
 			throw new \InvalidArgumentException("Type must be an integer, got ".var_export($type)." instead.");
 		}
 		if (!is_string($data)) {
-			throw new \InvalidArgumentException("Data must be a binary string, got ".var_export($data)." instead.");
+			if (strlen($data) == 0) {
+				$data = "";
+			} else {
+				throw new \InvalidArgumentException("Data must be a binary string, got ".var_export($data)." instead.");
+			}
 		}
 
 		$this->type = $type;

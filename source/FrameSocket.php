@@ -65,7 +65,7 @@ class FrameSocket
 				$this->buffer = substr($this->buffer, 5 + $this->expectedLength);
 				$this->expectedType = null;
 				$this->expectedLength = null;
-				call_user_func($this->callback, $f);
+				call_user_func($this->callback, $f, $this);
 			} else {
 				break;
 			}

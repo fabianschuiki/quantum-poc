@@ -6,6 +6,10 @@
  * and information conversion.
  */
 
+define("kStringFrameType", 1);
+define("kIntegerFrameType", 2);
+define("kRequestQuantumFrameType", 200);
+
 class Server
 {
 	protected $socketPath;
@@ -87,39 +91,78 @@ class Server
 
 		//Accept incoming connections.
 		do {
-			$changed = $this->clients;
-			$changed[] = $this->socket;
-			$w = null; $e = null;
-			if (!socket_select($changed, $w, $e, null)) {
+			$getSocketFunc = function($c){ return $c->getSocket(); };
+			$r = array_map($getSocketFunc, $this->clients);
+			$w = array_map($getSocketFunc, array_filter($this->clients, function($c){
+				return $c->wantsToWrite();
+			}));
+			$e = null;
+			$r[] = $this->socket;
+			if (!socket_select($r, $w, $e, null)) {
 				throw new \RuntimeException("Error during socket_select: ".socket_last_error().".");
 			}
 
 			//New connection available.
-			if (in_array($this->socket, $changed, true)) {
+			if (in_array($this->socket, $r, true)) {
 				$client = socket_accept($this->socket);
 				if (!$client)
 					throw new \RuntimeError("Unable to accept connection.");
-				$this->clients[] = $client;
-				echo "client connected\n";
+				$this->clients[] = new FrameSocket ($client, array($this, "serveClient"));
+				echo "Client connected.\n";
 			}
 
 			//Handle client communication.
-			foreach ($changed as $client) {
-				if (!in_array($client, $this->clients, true)) continue;
-				$received = socket_read($client, 1024*1024);
-				if (!$received) {
-					echo "client disconnected\n";
-					$this->clients = array_diff($this->clients, array($client));
-					continue;
+			foreach ($this->clients as $client) {
+				//Reading.
+				if (in_array($client->getSocket(), $r, true)) {
+					if (!$client->read()) {
+						echo "Client disconnected.\n";
+						$this->clients = array_filter($this->clients, function($c) use ($client) {
+							return $c !== $client;
+						});
+						continue;
+					}
 				}
-				$this->serveClient($client, unserialize($received));
+
+				//Writing.
+				if (in_array($client->getSocket(), $w, true)) {
+					$client->write();
+				}
 			}
 		} while (true);
 	}
 
-	public function serveClient($client, \stdClass $request)
+	public function serveClient(Frame $frame, FrameSocket $client)
 	{
-		switch ($request->type) {
+		//Decode the request.
+		switch ($frame->getType()) {
+			case kRequestQuantumFrameType: {
+				if (strlen($frame->getData()) == 0) {
+					echo "-> root quantum requested\n";
+				} else {
+					$input = $frame->getData();
+					$requestID = static::decodeFrame(Frame::unserialize($input, $consumed));
+					$input = substr($input, $consumed);
+					if (!is_integer($requestID)) {
+						echo "*** Client didn't provide a request ID\n";
+						break;
+					}
+
+					$data = static::decodeFrame(Frame::unserialize($input, $consumed));
+					if (is_integer($data)) {
+						echo "-> quantum with ID $data requested\n";
+					} else {
+						echo "-> quantum at path $data requested\n";
+					}
+				}
+			} break;
+			default: {
+				$this->respondWithError($client, "Request type {$frame->getType()} is not supported");
+				echo "*** Client sent unsupported request type {$frame->getType()}\n";
+			} break;
+		}
+
+		/*switch ($request->type) {
 			case "GET": {
 				$root = $this->quanta[1];
 				$child = $root;
@@ -163,7 +206,12 @@ class Server
 			default: {
 				echo "Request type \"{$request->type}\" is not supported.\n";
 			} break;
-		}
+		}*/
+	}
+
+	private function respondWithError(FrameSocket $client, $message)
+	{
+		$client->writeFrame(new Frame (255, $message));
 	}
 
 	private function notifyChange(Information\Quantum $quantum, $path = "")
@@ -297,5 +345,33 @@ class Server
 		if ($e !== $editor) {
 			throw new \InvalidArgumentException("Trying to pop editor ".var_export($editor).", yet ".var_export($e)." was on the stack.");
 		}
+	}
+
+	static public function encodeFrame($data)
+	{
+		if (is_string($data)) {
+			return new Frame (kStringFrameType, $data);
+		}
+		if (is_integer($data)) {
+			return new Frame (kIntegerFrameType, pack("l", $data));
+		}
+		throw new \InvalidArgumentException("Unable to encode ".var_export($data)." into a frame.");
+	}
+
+	static public function decodeFrame(Frame $frame)
+	{
+		switch ($frame->getType()) {
+			case kStringFrameType: {
+				return $frame->getData();
+			} break;
+			case kIntegerFrameType: {
+				$a = unpack("li", $frame->getData());
+				return $a["i"];
+			} break;
+			default: {
+				echo "*** Unable to decode frame {$frame->getType()}\n";
+			} break;
+		}
+		return null;
 	}
 }

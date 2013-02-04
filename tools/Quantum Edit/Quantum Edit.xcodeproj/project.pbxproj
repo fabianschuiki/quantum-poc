@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		1DDD58160DA1D0A300B32029 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1DDD58140DA1D0A300B32029 /* MainMenu.xib */; };
 		1F0C709116BF9EF500E83FF3 /* QERequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F0C709016BF9EF500E83FF3 /* QERequest.m */; };
+		1F0C709416BFAEBA00E83FF3 /* QEEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F0C709316BFAEBA00E83FF3 /* QEEditor.m */; };
 		1F2DAB8C16BEF88F002C7A8D /* Editor.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1F2DAB8A16BEF88F002C7A8D /* Editor.xib */; };
 		1F2DAB8F16BEF9C9002C7A8D /* QEApplication.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F2DAB8E16BEF9C9002C7A8D /* QEApplication.m */; };
 		1F2DABCF16BEFF0C002C7A8D /* QEFrame.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F2DABCE16BEFF0C002C7A8D /* QEFrame.m */; };
@@ -25,6 +26,8 @@
 		1DDD58150DA1D0A300B32029 /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		1F0C708F16BF9EF500E83FF3 /* QERequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QERequest.h; sourceTree = "<group>"; };
 		1F0C709016BF9EF500E83FF3 /* QERequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QERequest.m; sourceTree = "<group>"; };
+		1F0C709216BFAEBA00E83FF3 /* QEEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QEEditor.h; sourceTree = "<group>"; };
+		1F0C709316BFAEBA00E83FF3 /* QEEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QEEditor.m; sourceTree = "<group>"; };
 		1F2DAB8B16BEF88F002C7A8D /* English */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = English; path = English.lproj/Editor.xib; sourceTree = "<group>"; };
 		1F2DAB8D16BEF9C9002C7A8D /* QEApplication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QEApplication.h; sourceTree = "<group>"; };
 		1F2DAB8E16BEF9C9002C7A8D /* QEApplication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QEApplication.m; sourceTree = "<group>"; };
@@ -61,6 +64,8 @@
 				1F2DAB8E16BEF9C9002C7A8D /* QEApplication.m */,
 				1F2DABCD16BEFF0C002C7A8D /* QEFrame.h */,
 				1F2DABCE16BEFF0C002C7A8D /* QEFrame.m */,
+				1F0C709216BFAEBA00E83FF3 /* QEEditor.h */,
+				1F0C709316BFAEBA00E83FF3 /* QEEditor.m */,
 				1F0C708F16BF9EF500E83FF3 /* QERequest.h */,
 				1F0C709016BF9EF500E83FF3 /* QERequest.m */,
 			);
@@ -199,6 +204,7 @@
 				1F2DAB8F16BEF9C9002C7A8D /* QEApplication.m in Sources */,
 				1F2DABCF16BEFF0C002C7A8D /* QEFrame.m in Sources */,
 				1F0C709116BF9EF500E83FF3 /* QERequest.m in Sources */,
+				1F0C709416BFAEBA00E83FF3 /* QEEditor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
