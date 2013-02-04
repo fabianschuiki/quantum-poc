@@ -42,16 +42,29 @@
 	
 	//Wrap the socket in a file handle.
 	server = [[NSFileHandle alloc] initWithFileDescriptor:s closeOnDealloc:YES];
-	
-	//Send some random stuff.
-	QEFrame *f = [QEFrame frameWithType:1 data:[[QEFrame frameWithType:1 data:[@"Hello World" dataUsingEncoding:NSUTF8StringEncoding]] serialize]];
-	[server writeData:[f serialize]];
+	serverBuffer = [[NSMutableData data] retain];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receivedFromServer:) name:NSFileHandleReadCompletionNotification object:nil];
+	[server readInBackgroundAndNotify];
 }
 
 - (void)dealloc
 {
 	[server release];
+	[serverBuffer release];
 	[super dealloc];
+}
+
+- (void)receivedFromServer:(NSNotification *)notification
+{
+	[server readInBackgroundAndNotify];
+	[serverBuffer appendData:[[notification userInfo] objectForKey:NSFileHandleNotificationDataItem]];
+	
+	//Decode the frame we received.
+	NSUInteger consumed = 0;
+	QEFrame *frame = [QEFrame unserialize:serverBuffer consumed:&consumed];
+	[serverBuffer replaceBytesInRange:NSMakeRange(0, consumed) withBytes:NULL length:0];
+	
+	NSLog(@"Received frame %@", frame);
 }
 
 @end

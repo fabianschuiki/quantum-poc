@@ -39,15 +39,24 @@ while (true) {
 	//Create a new FrameSocket for this client.
 	$done = false;
 	$fs = new FrameSocket ($client, function(Frame $frame) use (&$done) {
-		echo "Received frame of type {$frame->getType()}\n";
-		$f = Frame::unserialize($frame->getData());
-		echo "-> contains frame of type {$f->getType()}: {$f->getData()}\n";
-		$done = true;
 	});
 
-	while (!$done) {
-		echo "Waiting for data...\n";
-		if (!$fs->read()) break;
+	//Send the welcome frame.
+	$fs->writeFrame(new Frame (1, "Welcome, Client!"));
+
+	while (true) {
+		$r = array($fs->getSocket());
+		$w = ($fs->wantsToWrite() ? $r : array());
+		$e = null;
+		socket_select($r, $w, $e, null);
+		if (count($r)) {
+			echo " <- reading\n";
+			if (!$fs->read()) break;
+		}
+		if (count($w)) {
+			echo " -> writing\n";
+			$fs->write();
+		}
 	}
 
 	echo "Client disconnected\n";

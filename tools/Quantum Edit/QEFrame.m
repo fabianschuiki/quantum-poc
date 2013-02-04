@@ -9,6 +9,12 @@
 #import "QEFrame.h"
 
 
+struct FrameHeader {
+	uint8_t type;
+	uint32_t length;
+} __attribute__((packed));
+
+
 @implementation QEFrame
 
 + (id)frameWithType:(NSUInteger)type data:(NSData *)data
@@ -32,6 +38,11 @@
 	[super dealloc];
 }
 
+- (NSString *)description
+{
+	return [NSString stringWithFormat:@"%@(type %i, %i Bytes)", [super description], type, [data length]];
+}
+
 - (NSUInteger)type
 {
 	return type;
@@ -45,10 +56,7 @@
 - (NSData *)serialize
 {
 	//Assemble the header.
-	struct {
-		uint8_t type;
-		uint32_t length;
-	} __attribute__((packed)) h;
+	struct FrameHeader h;
 	h.type = type;
 	h.length = [data length];
 	
@@ -65,7 +73,25 @@
 
 + (id)unserialize:(NSData *)data consumed:(NSUInteger *)consumed
 {
-	return nil;
+	if (consumed)
+		*consumed = 0;
+	
+	//Read the frame header.
+	struct FrameHeader h;
+	if ([data length] < 5) {
+		[NSException raise:NSInvalidArgumentException format:@"Not enough data to unserialize frame from data with only %i Bytes, at least 5 Bytes required.", [data length]];
+	}
+	[data getBytes:&h length:5];
+	
+	//Read the payload data.
+	if ([data length] < h.length + 5) {
+		[NSException raise:NSInvalidArgumentException format:@"Not enough data to unserialize frame; required %i Bytes, got only %i Bytes.", h.length + 5, [data length]];
+	}
+	QEFrame *f = [QEFrame frameWithType:h.type data:[data subdataWithRange:NSMakeRange(5, h.length)]];
+	if (consumed)
+		*consumed = h.length + 5;
+	
+	return f;
 }
 
 @end

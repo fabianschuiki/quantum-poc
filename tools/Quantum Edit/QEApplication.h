@@ -15,8 +15,10 @@
 {
 	IBOutlet NSTextField *quantumPath;
 	NSFileHandle *server;
+	NSMutableData *serverBuffer;
 }
 
 - (IBAction)openQuantum:(id)sender;
+- (void)receivedFromServer:(NSNotification *)notification;
 
 @end
