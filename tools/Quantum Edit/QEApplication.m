@@ -17,7 +17,8 @@ enum {
 	kStringFrameType = 1,
 	kIntegerFrameType = 2,
 	
-	kRequestQuantumFrameType = 200
+	kRequestQuantumFrameType = 200,
+	kRequestQuantumResponseFrameType = 201
 };
 
 
@@ -86,6 +87,9 @@ enum {
 		
 		//Handle the received frame.
 		switch (frame.type) {
+			case kRequestQuantumResponseFrameType: {
+				NSLog(@"Server sent quantum request response %@", frame);
+			} break;
 			case 255: {
 				NSRunAlertPanel(@"Server Error", @"The Quantum Server returned an error: %@.", @"OK", nil, nil, [[[NSString alloc] initWithData:frame.data encoding:NSUTF8StringEncoding] autorelease]);
 			} break;

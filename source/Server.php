@@ -9,6 +9,7 @@
 define("kStringFrameType", 1);
 define("kIntegerFrameType", 2);
 define("kRequestQuantumFrameType", 200);
+define("kRequestQuantumResponseFrameType", 201);
 
 class Server
 {
@@ -134,26 +135,30 @@ class Server
 
 	public function serveClient(Frame $frame, FrameSocket $client)
 	{
+		//Decoce the request ID first.
+		$input = $frame->getData();
+		$requestID = static::consumeAndDecodeFrameData($input);
+		if (!is_integer($requestID)) {
+			echo "*** Client sent request {$frame->getType()} without a request ID\n";
+			break;
+		}
+
 		//Decode the request.
 		switch ($frame->getType()) {
 			case kRequestQuantumFrameType: {
 				if (strlen($frame->getData()) == 0) {
 					echo "-> root quantum requested\n";
 				} else {
-					$input = $frame->getData();
-					$requestID = static::decodeFrame(Frame::unserialize($input, $consumed));
-					$input = substr($input, $consumed);
-					if (!is_integer($requestID)) {
-						echo "*** Client didn't provide a request ID\n";
-						break;
-					}
-
-					$data = static::decodeFrame(Frame::unserialize($input, $consumed));
+					$data = static::consumeAndDecodeFrameData($input);
 					if (is_integer($data)) {
 						echo "-> quantum with ID $data requested\n";
 					} else {
 						echo "-> quantum at path $data requested\n";
 					}
+
+					$response = $this->encodeFrame($requestID)->serialize();
+					$response .= $this->encodeFrame("Here is your $data quantum!")->serialize();
+					$client->writeFrame(new Frame (kRequestQuantumResponseFrameType, $response));
 				}
 			} break;
 			default: {
@@ -373,5 +378,12 @@ class Server
 			} break;
 		}
 		return null;
+	}
+
+	static public function consumeAndDecodeFrameData(&$input)
+	{
+		$data = static::decodeFrame(Frame::unserialize($input, $consumed));
+		$input = substr($input, $consumed);
+		return $data;
 	}
 }
