@@ -150,14 +150,27 @@ class Server
 					echo "-> root quantum requested\n";
 				} else {
 					$data = static::consumeAndDecodeFrameData($input);
+					$quantum = null;
 					if (is_integer($data)) {
 						echo "-> quantum with ID $data requested\n";
+						$quantum = @$this->quanta[$data];
 					} else {
 						echo "-> quantum at path $data requested\n";
+						$quantum = $this->quanta[1];
+						foreach (explode("/", $data) as $name) {
+							if (!$quantum) break;
+							$quantum = $quantum->getChild($name);
+						}
 					}
 
+					//Return the quantum or an error it didn't exist.
 					$response = $this->encodeFrame($requestID)->serialize();
-					$response .= $this->encodeFrame("Here is your $data quantum!")->serialize();
+					if ($quantum) {
+						$response .= $this->encodeFrame($quantum)->serialize();
+					} else {
+						$f = new Frame (255, "Quantum $data does not exist");
+						$response .= $f->serialize();
+					}
 					$client->writeFrame(new Frame (kRequestQuantumResponseFrameType, $response));
 				}
 			} break;

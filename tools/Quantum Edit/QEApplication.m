@@ -89,6 +89,16 @@ enum {
 		switch (frame.type) {
 			case kRequestQuantumResponseFrameType: {
 				NSLog(@"Server sent quantum request response %@", frame);
+				NSData *d = frame.data;
+				QEFrame *requestIDFrame = [QEFrame unserialize:d consumed:&consumed];
+				NSInteger rid = [[self decodeFromFrame:requestIDFrame] integerValue];
+				QEFrame *payloadFrame = [QEFrame unserialize:[d subdataWithRange:NSMakeRange(consumed, [d length] - consumed)]];
+				if (payloadFrame.type == 255) {
+					NSRunAlertPanel(@"Request Error", @"The Quantum Server returned an error when handling request %i: %@.", @"OK", nil, nil, rid, [[[NSString alloc] initWithData:payloadFrame.data encoding:NSUTF8StringEncoding] autorelease]);
+				} else {
+					id payload = [self decodeFromFrame:payloadFrame];
+					NSLog(@"Received %@", payload);
+				}
 			} break;
 			case 255: {
 				NSRunAlertPanel(@"Server Error", @"The Quantum Server returned an error: %@.", @"OK", nil, nil, [[[NSString alloc] initWithData:frame.data encoding:NSUTF8StringEncoding] autorelease]);
@@ -130,10 +140,10 @@ enum {
 - (id)decodeFromFrame:(QEFrame *)frame
 {
 	switch (frame.type) {
-		case 1: {
+		case kStringFrameType: {
 			return [[[NSString alloc] initWithData:frame.data encoding:NSUTF8StringEncoding] autorelease];
 		} break;
-		case 2: {
+		case kIntegerFrameType: {
 			int32_t i;
 			[frame.data getBytes:&i length:4];
 			return [NSNumber numberWithInt:i];
