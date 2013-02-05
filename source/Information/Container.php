@@ -18,6 +18,13 @@ class Container extends Quantum
 		$this->childrenIds = array();
 	}
 
+	/** Returns an associative array of name-id pairs of all children of this
+	 * container. */
+	public function getChildIds()
+	{
+		return $this->childrenIds;
+	}
+
 	/** Returns the child id for the given name, or null if it doesn't exist. */
 	public function getChildId($name)
 	{

@@ -14,31 +14,26 @@ class Serializer
 	 */
 	static public function encode(Quantum $quantum)
 	{
-		if ($quantum instanceof Container) $name = "container";
-		if ($quantum instanceof Raw) $name = "raw";
-		if ($quantum instanceof String) $name = "string";
+		$encoded = array();
 
 		//Common properties.
-		$xml = new \SimpleXMLElement ("<$name/>");
-		$xml->addAttribute("id", $quantum->getId());
-		$xml->addAttribute("parent", $quantum->getParentId());
-		$xml->addAttribute("name", $quantum->getName());
+		$encoded["id"] = $quantum->getId();
+		$encoded["type"] = $quantum->getType();
+		if ($p = $quantum->getParentId()) $encoded["parent"] = $p;
+		if ($n = $quantum->getName()) $encoded["name"] = $n;
 
 		//Subclasses.
 		if ($quantum instanceof Container) {
-			$xml->addAttribute("type", $quantum->getType());
-			foreach ($quantum->getChildIds() as $childName => $childId) {
-				$xml->addChild($childName, $childId);
-			}
+			$encoded["children"] = $quantum->getChildIds();
 		}
 		if ($quantum instanceof Raw) {
-			$xml->addChild("data", $quantum->getData());
+			$encoded["data"] = base64_encode($quantum->getData());
 		}
 		if ($quantum instanceof String) {
-			$xml->addChild("string", $quantum->getString());
+			$encoded["string"] = $quantum->getString();
 		}
 
-		return $xml->asXML();
+		return json_encode($encoded);
 	}
 
 	/**

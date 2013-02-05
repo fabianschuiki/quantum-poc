@@ -49,6 +49,9 @@ class Server
 		//Load the initial file contents.
 		$this->notifyChangeDown($file, "");
 
+		//Test the serializer.
+		file_put_contents("/tmp/quantum-serializer.json", Information\Serializer::encode($content));
+
 		//Register the information quantum change callback.
 		Information\Quantum::$changeCallback = array($this, "notifyQuantumChanged");
 	}
