@@ -12,7 +12,14 @@ $path = $argv[1];
 
 //Connect to the quantum server.
 $socketPath = "/tmp/quantum.sock";
-$socket = fsockopen("unix://$socketPath") or die ("Unable to connect to $socketPath.\n");
+$raw_socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
+if (!$raw_socket) {
+	throw new \RuntimeException("Unable to create socket.");
+}
+if (!socket_connect($raw_socket, $socketPath)) {
+	throw new \RuntimeException("Unable to connect to $socketPath.");
+}
+$socket = new FrameSocket($raw_socket, "handleFrame");
 
 //Setup an IQ change callback that sends altered information objects back to the server.
 Information\Quantum::$changeCallback = function (Information\Quantum $quantum) use ($socket) {
@@ -24,10 +31,23 @@ Information\Quantum::$changeCallback = function (Information\Quantum $quantum) u
 
 //Request the information object.
 $request = new stdClass;
+$request->rid = 1;
 $request->type = "GET";
 $request->path = $path;
 $request->as = "string";
-fwrite($socket, serialize($request));
+$socket->writeFrame(new Frame (1, json_encode($request)));
+
+//Enter the main loop.
+while (true) {
+	$r = array($raw_socket);
+	$w = ($socket->wantsToWrite() ? array($raw_socket) : null);
+	$e = null;
+	socket_select($r, $w, $e, null);
+	if (in_array($raw_socket, $r, true)) $socket->read();
+	if (in_array($raw_socket, $w, true)) $socket->write();
+}
+
+exit;
 
 //Wait for the response.
 $responseRaw = fread($socket, 1024);
@@ -43,3 +63,20 @@ $tmpFile = "/tmp/information_quantum";
 file_put_contents($tmpFile, $iq->getString());
 passthru("vim ".escapeshellarg($tmpFile));
 $iq->setString(file_get_contents($tmpFile));
+
+function handleFrame(Frame $frame, FrameSocket $socket)
+{
+	if ($frame->getType() === 255) {
+		die("Server Error: {$frame->getData()}\n");
+	}
+	if ($frame->getType() !== 1) {
+		throw new \RuntimeException("Server sent frame of type {$frame->getType()}, but only frame types 1 and 255 are supported.");
+	}
+
+	//Decode the response.
+	$response = json_decode($frame->getData());
+	if (!$response) {
+		throw new \RuntimeException("Server sent invalid JSON response: {$frame->getData()}");
+	}
+	print_r($response);
+}

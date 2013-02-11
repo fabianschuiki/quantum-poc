@@ -136,42 +136,31 @@ class Server
 		} while (true);
 	}
 
+	/** Handles frames received from a certain client. */
 	public function serveClient(Frame $frame, FrameSocket $client)
 	{
-		//Decoce the request ID first.
-		$input = $frame->getData();
-		$requestID = static::consumeAndDecodeFrameData($input);
-		if (!is_integer($requestID)) {
-			echo "*** Client sent request {$frame->getType()} without a request ID\n";
-			break;
+		if ($frame->getType() === 255) {
+			echo "Client sent error: {$frame->getData()}\n";
+			return;
+		}
+		if ($frame->getType() != 1) {
+			echo "Client sent frame $frame, but only frames of type 1 and 255 are supported.\n";
+			$this->respondWithError($client, "Frame type {$frame->getType()} not supported.");
+			return;
 		}
 
-		//Decode the request.
-		switch ($frame->getType()) {
-			case kRequestQuantumFrameType: {
-				if (strlen($frame->getData()) == 0) {
-					echo "-> root quantum requested\n";
-				} else {
-					$data = static::consumeAndDecodeFrameData($input);
-					if (is_integer($data)) {
-						echo "-> quantum with ID $data requested\n";
-					} else {
-						echo "-> quantum at path $data requested\n";
-					}
-
-					$response = $this->encodeFrame($requestID)->serialize();
-					$response .= $this->encodeFrame("Here is your $data quantum!")->serialize();
-					$client->writeFrame(new Frame (kRequestQuantumResponseFrameType, $response));
-				}
-			} break;
-			default: {
-				$this->respondWithError($client, "Request type {$frame->getType()} is not supported");
-				echo "*** Client sent unsupported request type {$frame->getType()}\n";
-			} break;
+		//Decode the JSON data in the frame.
+		$request = json_decode($frame->getData());
+		if (!$request) {
+			echo "Client sent invalid JSON data: {$frame->getData()}\n";
+			return;
 		}
 
-		/*switch ($request->type) {
+		//Handle the request.
+		print_r($request);
+		switch ($request->type) {
 			case "GET": {
+				//Look up the requested child.
 				$root = $this->quanta[1];
 				$child = $root;
 				foreach (explode("/", $request->path) as $name) {
@@ -183,38 +172,23 @@ class Server
 					if ($type !== $child->getType()) {
 						$caster = $this->getCaster($child, $type);
 						if (!$caster) {
-							$response->type = "FAIL";
-							$response->message = "Information quantum {$request->path} of type {$child->getType()} cannot be converted to {$request->as}.";
+							$this->respondWithError($client, "Information quantum {$request->path} of type {$child->getType()} cannot be converted to {$request->as}.");
 							$child = null;
 						} else {
 							$child = $caster->getOutput();
 						}
 					}
 					if ($child) {
-						$response->type = "QUANTUM";
-						$response->payload = $child;
+						$response = new \stdClass;
+						$response->rid = $object->rid;
+						$response->iq = Information\Serializer::encode($child);
+						$client->writeFrame(new Frame (1, json_encode($response)));
 					}
 				} else {
-					$response->type = "FAIL";
-					$response->message = "Information quantum {$request->path} doesn't exist.";
+					$this->respondWithError($client, "Information quantum {$request->path} doesn't exist.");
 				}
-				socket_write($client, serialize($response));
 			} break;
-			case "SET": {
-				if (!$request->payload instanceof Information\Quantum) {
-					echo "Payload is no information quantum.";
-					print_r($request);
-					break;
-				}
-				$this->quanta[$request->payload->getId()] = $request->payload;
-				$this->pushEditor($client);
-				$this->notifyChange($request->payload, "");
-				$this->popEditor($client);
-			} break;
-			default: {
-				echo "Request type \"{$request->type}\" is not supported.\n";
-			} break;
-		}*/
+		}
 	}
 
 	private function respondWithError(FrameSocket $client, $message)
