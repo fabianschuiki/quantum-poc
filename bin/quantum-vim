@@ -23,10 +23,10 @@ $socket = new FrameSocket($raw_socket, "handleFrame");
 
 //Setup an IQ change callback that sends altered information objects back to the server.
 Information\Quantum::$changeCallback = function (Information\Quantum $quantum) use ($socket) {
-	$request = new stdClass;
+	/*$request = new stdClass;
 	$request->type = "SET";
 	$request->payload = $quantum;
-	fwrite($socket, serialize($request));
+	fwrite($socket, serialize($request));*/
 };
 
 //Request the information object.
@@ -40,10 +40,10 @@ $socket->writeFrame(new Frame (1, json_encode($request)));
 //Enter the main loop.
 while (true) {
 	$r = array($raw_socket);
-	$w = ($socket->wantsToWrite() ? array($raw_socket) : null);
+	$w = ($socket->wantsToWrite() ? array($raw_socket) : array());
 	$e = null;
 	socket_select($r, $w, $e, null);
-	if (in_array($raw_socket, $r, true)) $socket->read();
+	if (in_array($raw_socket, $r, true)) if (!$socket->read()) exit;
 	if (in_array($raw_socket, $w, true)) $socket->write();
 }
 
@@ -79,4 +79,20 @@ function handleFrame(Frame $frame, FrameSocket $socket)
 		throw new \RuntimeException("Server sent invalid JSON response: {$frame->getData()}");
 	}
 	print_r($response);
+
+	//If we just received the information quantum, keep it around for editing.
+	global $quantum;
+	if ($response->rid == 1 && $response->type == "SET") {
+		$quantum = Information\Serializer::decode($response->iq);
+		if (!$quantum) {
+			throw new \RuntimeException("Unable to decode {$response->iq}.");
+		}
+		echo "Decoded $quantum\n";
+
+		//Edit the quantum.
+		$tmpFile = "/tmp/information_quantum";
+		file_put_contents($tmpFile, $quantum->getString());
+		passthru("vim ".escapeshellarg($tmpFile));
+		//$iq->setString(file_get_contents($tmpFile));
+	}
 }

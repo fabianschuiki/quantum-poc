@@ -27,7 +27,7 @@ class Serializer
 			$encoded["children"] = $quantum->getChildIds();
 		}
 		if ($quantum instanceof Raw) {
-			$encoded["data"] = base64_encode($quantum->getData());
+			$encoded["data"] = $quantum->getData();
 		}
 		if ($quantum instanceof String) {
 			$encoded["string"] = $quantum->getString();
@@ -39,8 +39,36 @@ class Serializer
 	/**
 	 * Decodes an information quantum from the given XML representation.
 	 */
-	static public function decode()
+	static public function decode($json)
 	{
+		$decoded = json_decode($json, true);
+		if (!$decoded) {
+			throw new \RuntimeException("Unable to decode $json.");
+		}
 
+		//Decode the different types.
+		$quantum = null;
+		switch ($decoded["type"]) {
+			case "raw": {
+				$quantum = new Raw($decoded["id"]);
+				$quantum->setData($decoded["data"]);
+			} break;
+			case "string": {
+				$quantum = new String($decoded["id"]);
+				$quantum->setString($decoded["string"]);
+			} break;
+			default: {
+				$quantum = new Container($decoded["id"], $decoded["type"]);
+				$quantum->setChildrenIds($encoded["children"]);
+			} break;
+		}
+
+		//Decode the common things.
+		if ($quantum) {
+			if (isset($decoded["parent"])) $quantum->setParentId($decoded["parent"]);
+			if (isset($decoded["name"])) $quantum->setName($decoded["name"]);
+		}
+
+		return $quantum;
 	}
 }

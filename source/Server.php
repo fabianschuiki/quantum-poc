@@ -180,7 +180,8 @@ class Server
 					}
 					if ($child) {
 						$response = new \stdClass;
-						$response->rid = $object->rid;
+						$response->rid = $request->rid;
+						$response->type = "SET";
 						$response->iq = Information\Serializer::encode($child);
 						$client->writeFrame(new Frame (1, json_encode($response)));
 					}
