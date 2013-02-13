@@ -11,11 +11,11 @@ class String extends Quantum
 
 	/** Sets the string encapsulated by this quantum. Issues an information
 	 * change event. */
-	public function setString($s)
+	public function setString($s, $notify = true)
 	{
 		if ($this->string != $s) {
 			$this->string = $s;
-			$this->notifyChange();
+			if ($notify) $this->notifyChange();
 		}
 	}
 

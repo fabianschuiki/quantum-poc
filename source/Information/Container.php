@@ -35,9 +35,9 @@ class Container extends Quantum
 	 * the given name. Resolves the id first before adding the child, since the
 	 * child's parentId needs to be adjusted. Issues an information change
 	 * event. */
-	public function setChildId($name, $id)
+	public function setChildId($name, $id, $notify = true)
 	{
-		$this->setChild($name, $this->resolveId($id));
+		$this->setChild($name, $this->resolveId($id), $notify);
 	}
 
 	/** Returns the child information quantum with the given name, or null if
@@ -50,7 +50,7 @@ class Container extends Quantum
 
 	/** Adds the given information quantum to this quantum's children for the
 	 * given name. Issues an information change event. */
-	public function setChild($name, Quantum $info)
+	public function setChild($name, Quantum $info, $notify = true)
 	{
 		//Remove the existing child.
 		if ($childId = $this->getChildId($name)) {
@@ -58,7 +58,7 @@ class Container extends Quantum
 			if ($child->getParentId() != $this->getId()) {
 				throw new \RuntimeException("$this has child $child that has the wrong parent ID {$child->getParentId()}.");
 			}
-			$child->setParentId(null);
+			$child->setParentId(null, $notify);
 		}
 
 		//Do nothing if the child already belongs to this container.
@@ -70,10 +70,10 @@ class Container extends Quantum
 		if ($info->getParentId() !== null) {
 			throw new \RuntimeException("$this has been told to add child $info which already has parent {$info->getParentId()}.");
 		}
-		$info->setParent($this);
-		$info->setName($name);
+		$info->setParent($this, $notify);
+		$info->setName($name, $notify);
 		$this->childrenIds[$name] = $info->getId();
-		$this->notifyChange();
+		if ($notify) $this->notifyChange();
 	}
 
 	/** Sets this container's type. */

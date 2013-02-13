@@ -51,22 +51,22 @@ class Serializer
 		switch ($decoded["type"]) {
 			case "raw": {
 				$quantum = new Raw($decoded["id"]);
-				$quantum->setData($decoded["data"]);
+				$quantum->setData($decoded["data"], false);
 			} break;
 			case "string": {
 				$quantum = new String($decoded["id"]);
-				$quantum->setString($decoded["string"]);
+				$quantum->setString($decoded["string"], false);
 			} break;
 			default: {
 				$quantum = new Container($decoded["id"], $decoded["type"]);
-				$quantum->setChildrenIds($encoded["children"]);
+				$quantum->setChildrenIds($encoded["children"], false);
 			} break;
 		}
 
 		//Decode the common things.
 		if ($quantum) {
-			if (isset($decoded["parent"])) $quantum->setParentId($decoded["parent"]);
-			if (isset($decoded["name"])) $quantum->setName($decoded["name"]);
+			if (isset($decoded["parent"])) $quantum->setParentId($decoded["parent"], false);
+			if (isset($decoded["name"])) $quantum->setName($decoded["name"], false);
 		}
 
 		return $quantum;

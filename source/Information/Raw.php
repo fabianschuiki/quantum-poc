@@ -11,11 +11,11 @@ class Raw extends Quantum
 
 	/** Sets the raw data encapsulated by this quantum. Issues an information
 	 * change event. */
-	public function setData($d)
+	public function setData($d, $notify = true)
 	{
 		if ($this->data != $d) {
 			$this->data = $d;
-			$this->notifyChange();
+			if ($notify) $this->notifyChange();
 		}
 	}
 

@@ -23,10 +23,13 @@ $socket = new FrameSocket($raw_socket, "handleFrame");
 
 //Setup an IQ change callback that sends altered information objects back to the server.
 Information\Quantum::$changeCallback = function (Information\Quantum $quantum) use ($socket) {
-	/*$request = new stdClass;
-	$request->type = "SET";
-	$request->payload = $quantum;
-	fwrite($socket, serialize($request));*/
+	echo "Altered $quantum.\n";
+	$request = new stdClass;
+	$request->type = "SET STRING";
+	$request->rid = 2;
+	$request->id = $quantum->getId();
+	$request->string = $quantum->getString();
+	$socket->writeFrame(new Frame (1, json_encode($request)));
 };
 
 //Request the information object.
@@ -91,8 +94,14 @@ function handleFrame(Frame $frame, FrameSocket $socket)
 
 		//Edit the quantum.
 		$tmpFile = "/tmp/information_quantum";
-		file_put_contents($tmpFile, $quantum->getString());
+		$str = $quantum->getString();
+		file_put_contents($tmpFile, $str);
 		passthru("vim ".escapeshellarg($tmpFile));
-		//$iq->setString(file_get_contents($tmpFile));
+		$str = file_get_contents($tmpFile);
+		$quantum->setString($str);
+	}
+	if ($response->rid == 2) {
+		echo "Quantum saved. Exiting.\n";
+		exit;
 	}
 }

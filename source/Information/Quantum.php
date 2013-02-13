@@ -33,11 +33,11 @@ abstract class Quantum
 
 	/** Changes the quantum's parentId, thus issuing an information change
 	 * event. */
-	public function setParentId($id)
+	public function setParentId($id, $notify = true)
 	{
 		if ($this->parentId !== $id) {
 			$this->parentId = $id;
-			$this->notifyChange();
+			if ($notify) $this->notifyChange();
 		}
 	}
 
@@ -51,9 +51,9 @@ abstract class Quantum
 
 	/** Changes the quantum's parent. This will in fact adjust this quantum's
 	 * parentId and issue an information change event. */
-	public function setParent(self $parent = null)
+	public function setParent(self $parent = null, $notify = true)
 	{
-		$this->setParentId($parent ? $parent->getId() : null);
+		$this->setParentId($parent ? $parent->getId() : null, $notify);
 	}
 
 	/** Returns this information quantum's name. In general, if this quantum is
@@ -62,11 +62,11 @@ abstract class Quantum
 
 	/** Sets the quantum's name. You should never have to call this yourself.
 	 * Whenever the quantum is added to a container, its name is adjusted. */
-	public function setName($name)
+	public function setName($name, $notify = true)
 	{
 		if ($this->name !== $name) {
 			$this->name = $name;
-			$this->notifyChange();
+			if ($notify) $this->notifyChange();
 		}
 	}
 

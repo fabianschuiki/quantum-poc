@@ -189,12 +189,34 @@ class Server
 					$this->respondWithError($client, "Information quantum {$request->path} doesn't exist.");
 				}
 			} break;
+
+			case "SET STRING": {
+				$quantum = @$this->quanta[$request->id];
+				if (!$quantum) {
+					$this->respondWithError($client, "Information quantum #{$request->id} doesn't exist.");
+				} else {
+					$quantum->setString($request->string);
+					$this->respondWithDone($client, $request->rid);
+				}
+			} break;
+
+			default: {
+				$this->respondWithError($client, "Request type {$request->type} is not supported.");
+			} break;
 		}
 	}
 
 	private function respondWithError(FrameSocket $client, $message)
 	{
 		$client->writeFrame(new Frame (255, $message));
+	}
+
+	private function respondWithDone(FrameSocket $client, $rid)
+	{
+		$response = new \stdClass;
+		$response->rid = $rid;
+		$response->type = "DONE";
+		$client->writeFrame(new Frame (1, json_encode($response)));
 	}
 
 	private function notifyChange(Information\Quantum $quantum, $path = "")
