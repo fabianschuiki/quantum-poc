@@ -9,20 +9,21 @@ namespace Information;
 
 class Container extends Quantum
 {
-	protected $childrenIds;
+	protected $childrenIds = array();
 	protected $type;
-
-	public function __construct($id)
-	{
-		parent::__construct($id);
-		$this->childrenIds = array();
-	}
 
 	/** Returns an associative array of name-id pairs of all children of this
 	 * container. */
 	public function getChildIds()
 	{
 		return $this->childrenIds;
+	}
+
+	/** Sets the associative array of name-id pairs of all children of this
+	 * container. You should never have to call this method directly. */
+	public function setChildIds(array $ids)
+	{
+		$this->childrenIds = $ids;
 	}
 
 	/** Returns the child id for the given name, or null if it doesn't exist. */
