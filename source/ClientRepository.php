@@ -101,6 +101,17 @@ class ClientRepository extends Repository
 			echo "Received a SET message with rid = {$message->rid}\n";
 		}
 
+		// Handle changes to string quanta.
+		else if ($message->type == "SET STRING") {
+			$quantum = $this->getQuantumWithId($message->id);
+			if (isset($message->range)) {
+				$quantum->replaceString($message->string, $message->range[0], $message->range[1], false);
+			} else {
+				$quantum->setString($message->string, false);
+			}
+			echo "SET STRING: $quantum changed string to \"{$quantum->getString()}\"\n";
+		}
+
 		// Throw an exception for unsupported messages.
 		else {
 			throw new \RuntimeException("Received unsupported message {$message->type}.");

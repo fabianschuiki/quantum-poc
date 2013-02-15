@@ -208,6 +208,7 @@ class Server
 						$response->type = "SET";
 						$response->iq = Information\Serializer::encode($child, $client->downstreamMapping);
 						$socket->writeFrame(new Frame (1, json_encode($response)));
+						$client->knownIds[] = $child->getId();
 					}
 				} else {
 					$this->respondWithError($socket, "Information quantum {$request->path} doesn't exist.");
@@ -225,6 +226,7 @@ class Server
 				$quantum->setId($globalId);
 				$client->upstreamMapping->add($localId, $globalId);
 				$client->downstreamMapping->add($localId, $globalId);
+				$client->knownIds[] = $globalId;
 			} break;
 
 			case "SET STRING": {
@@ -238,6 +240,17 @@ class Server
 						$quantum->setString($request->string, false);
 					}
 					echo "SET STRING: $id now is {$quantum->getString()}\n";
+
+					//Send the change downstream to all other clients that are interested.
+					foreach ($this->clients as $c) {
+						if ($client === $c) continue;
+						if (in_array($quantum->getId(), $c->knownIds)) {
+							$message = clone $request;
+							$message->rid = 0;
+							$message->id = $c->downstreamMapping->getLocalId($id);
+							$c->socket->writeFrame(new Frame(1, json_encode($message)));
+						}
+					}
 				}
 				catch (\Exception $e) {
 					$this->respondWithError($socket, $e->getMessage());

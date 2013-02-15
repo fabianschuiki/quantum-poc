@@ -15,9 +15,7 @@ echo "Created IQ $str\n";
 
 // Get the root information object and set the string as one of its children.
 $root = $repo->getRoot();
-echo "Done getting root.\n";
 $root->setChild("debug", $str);
-echo "Done setting child.\n";
 
 // Enter the communication loop.
 $repo->communicate();

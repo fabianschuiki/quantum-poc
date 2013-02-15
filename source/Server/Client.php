@@ -12,6 +12,7 @@ class Client
 	public $socket;
 	public $upstreamMapping;
 	public $downstreamMapping;
+	public $knownIds = array();
 
 	public function __construct()
 	{
