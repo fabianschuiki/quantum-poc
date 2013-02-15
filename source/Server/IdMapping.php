@@ -36,7 +36,7 @@ class IdMapping
 	{
 		if ($local > 0) return $local;
 		$id = @$this->localToGlobalIds[$local];
-		if ($id) {
+		if ($id === null) {
 			throw new \RuntimeException("Local ID $local has no global correspondence.");
 		}
 		return $id;

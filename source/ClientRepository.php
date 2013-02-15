@@ -84,7 +84,7 @@ class ClientRepository extends Repository
 	public function receivedFrame(Frame $frame, FrameSocket $socket)
 	{
 		if ($frame->getType() == 255) {
-			throw new \RuntimeException("Server Error: {$frame->getData()}");
+			die("Server Error: {$frame->getData()}\n");
 		}
 		if ($frame->getType() != 1) {
 			throw new \RuntimeException("Invalid frame type {$frame->getType()}, only types 1 and 255 are supported.");
@@ -155,5 +155,18 @@ class ClientRepository extends Repository
 	{
 		parent::removeQuantum($quantum);
 		throw new \RuntimeException("Quantum removal server notifications not implemented.");
+	}
+
+	/** Handles changes in string quanta and forwards them to the server. */
+	public function notifyStringChanged(Information\String $quantum, $range, $string)
+	{
+		echo "$quantum changed ".json_encode($range)." to \"$string\"\n";
+		$request = new \stdClass;
+		$request->rid = $this->allocRequestId();
+		$request->type = "SET STRING";
+		$request->id = $quantum->getId();
+		if ($range) $request->range = $range;
+		$request->string = $string;
+		$this->socket->writeFrame(new Frame(1, json_encode($request)));
 	}
 }

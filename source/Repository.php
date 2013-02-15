@@ -69,4 +69,9 @@ class Repository
 			unset($this->quanta[$old]);
 		}
 	}
+
+	public function notifyStringChanged(Information\String $quantum, $range, $string) {}
+	public function notifyRawChanged(Information\Raw $quantum, $range, $data) {}
+	public function notifyContainerAddedChild(Information\Container $quantum, $name) {}
+	public function notifyContainerRemovedChild(Information\Container $quantum, $name) {}
 }

@@ -233,12 +233,18 @@ class Server
 
 			case "SET STRING": {
 				try {
-					$quantum = $this->repository->getQuantumWithId($request->id);
-					$quantum->setString($request->string);
-					$this->respondWithDone($socket, $request->rid);
+					$id = $client->upstreamMapping->getGlobalId($request->id);
+					echo "SET STRING: $id ({$request->id})\n";
+					$quantum = $this->repository->getQuantumWithId($id);
+					if (isset($request->range)) {
+						$quantum->replaceString($request->string, $request->range[0], $request->range[1], false);
+					} else {
+						$quantum->setString($request->string, false);
+					}
+					echo "SET STRING: $id now is {$quantum->getString()}\n";
 				}
 				catch (\Exception $e) {
-					$this->respondWithError($socket, "Information quantum #{$request->id} doesn't exist.");
+					$this->respondWithError($socket, $e->getMessage());
 				}
 			} break;
 

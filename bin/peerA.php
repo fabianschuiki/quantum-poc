@@ -10,6 +10,7 @@ $repo->connect();
 // Create a new string quantum and add some data.
 $str = new Information\String ($repo);
 $str->setString("Hello World");
+$str->replaceString("Fo", 6, 1);
 echo "Created IQ $str\n";
 
 // Get the root information object and set the string as one of its children.

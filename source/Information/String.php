@@ -15,8 +15,17 @@ class String extends Quantum
 	{
 		if ($this->string != $s) {
 			$this->string = $s;
-			if ($notify) $this->notifyChange();
+			if ($notify) $this->repository->notifyStringChanged($this, null, $s);
 		}
+	}
+
+	/** Replaces the given range of the string with $string. */
+	public function replaceString($string, $start, $length = -1, $notify = true)
+	{
+		$s = ($start >= 0 ? $start : strlen($this->string) - $start);
+		$l = ($length >= 0 ? $length : strlen($this->string) - $s);
+		$this->string = substr($this->string, 0, $s).$string.substr($this->string, $s+$l);
+		if ($notify) $this->repository->notifyStringChanged($this, array($s,$l), $string);
 	}
 
 	/** Returns "string". */
