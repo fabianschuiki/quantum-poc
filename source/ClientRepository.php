@@ -169,4 +169,17 @@ class ClientRepository extends Repository
 		$request->string = $string;
 		$this->socket->writeFrame(new Frame(1, json_encode($request)));
 	}
+
+	/** Handles changes in container quanta and forwards the mto the server. */
+	public function notifyContainerAddedChild(Information\Container $quantum, $name)
+	{
+		echo "$quantum added child $name\n";
+		$request = new \stdClass;
+		$request->rid = $this->allocRequestId();
+		$request->type = "SET CHILD";
+		$request->id = $quantum->getId();
+		$request->name = $name;
+		$request->child = $quantum->getChildId($name);
+		$this->socket->writeFrame(new Frame(1, json_encode($request)));
+	}
 }

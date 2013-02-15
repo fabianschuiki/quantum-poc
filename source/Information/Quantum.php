@@ -107,7 +107,8 @@ abstract class Quantum
 	 * ID. This will usually use the standard resolve callback of the class. */
 	protected function resolveId($id)
 	{
-		return call_user_func(static::$resolveIdCallback, $id);
+		//return call_user_func(static::$resolveIdCallback, $id);
+		return $this->repository->getQuantumWithId($id);
 	}
 
 	/** Callback function that takes an ID and returns the appropriate

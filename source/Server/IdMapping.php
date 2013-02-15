@@ -34,7 +34,7 @@ class IdMapping
 	 * the local ID is not known. */
 	public function getGlobalId($local)
 	{
-		if ($local > 0) return $local;
+		if ($local >= 0) return $local;
 		$id = @$this->localToGlobalIds[$local];
 		if ($id === null) {
 			throw new \RuntimeException("Local ID $local has no global correspondence.");

@@ -74,7 +74,7 @@ class Container extends Quantum
 		$info->setParent($this, $notify);
 		$info->setName($name, $notify);
 		$this->childrenIds[$name] = $info->getId();
-		if ($notify) $this->notifyChange();
+		if ($notify) $this->repository->notifyContainerAddedChild($this, $name);
 	}
 
 	/** Sets this container's type. */

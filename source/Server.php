@@ -64,11 +64,7 @@ class Server
 	 * quantum does not exist. */
 	public function resolveQuantumId($id)
 	{
-		$quantum = @$this->quanta[$id];
-		if (!$quantum) {
-			throw new \InvalidArgumentException("Quantum $id does not exist.");
-		}
-		return $quantum;
+		return $this->repository->getQuantumWithId($id);
 	}
 
 	/** Returns a new and empty information quantum. */
@@ -242,6 +238,20 @@ class Server
 						$quantum->setString($request->string, false);
 					}
 					echo "SET STRING: $id now is {$quantum->getString()}\n";
+				}
+				catch (\Exception $e) {
+					$this->respondWithError($socket, $e->getMessage());
+				}
+			} break;
+
+			case "SET CHILD": {
+				try {
+					$id = $client->upstreamMapping->getGlobalId($request->id);
+					echo "SET CHILD: $id.{$request->name} ({$request->id})\n";
+					$quantum = $this->repository->getQuantumWithId($id);
+					$child = $client->upstreamMapping->getGlobalId($request->child);
+					$quantum->setChildId($request->name, $child, false);
+					echo "SET CHILD: $id now has children ".print_r($quantum->getChildIds(), true);
 				}
 				catch (\Exception $e) {
 					$this->respondWithError($socket, $e->getMessage());
