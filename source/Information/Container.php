@@ -38,7 +38,23 @@ class Container extends Quantum
 	 * event. */
 	public function setChildId($name, $id, $notify = true)
 	{
-		$this->setChild($name, $this->resolveId($id), $notify);
+		//Do nothing if the child already belongs to this container.
+		if (in_array($id, $this->childrenIds, true)) {
+			return;
+		}
+
+		//Remove the existing child.
+		if ($childId = $this->getChildId($name)) {
+			$child = $this->resolveId($childId);
+			if ($child->getParentId() != $this->getId()) {
+				throw new \RuntimeException("$this has child $child that has the wrong parent ID {$child->getParentId()}.");
+			}
+			$child->setParentId(null, $notify);
+		}
+
+		//Set the new child.
+		$this->childrenIds[$name] = $id;
+		if ($notify) $this->repository->notifyContainerAddedChild($this, $name);
 	}
 
 	/** Returns the child information quantum with the given name, or null if
@@ -53,28 +69,12 @@ class Container extends Quantum
 	 * given name. Issues an information change event. */
 	public function setChild($name, Quantum $info, $notify = true)
 	{
-		//Remove the existing child.
-		if ($childId = $this->getChildId($name)) {
-			$child = $this->resolveId($childId);
-			if ($child->getParentId() != $this->getId()) {
-				throw new \RuntimeException("$this has child $child that has the wrong parent ID {$child->getParentId()}.");
-			}
-			$child->setParentId(null, $notify);
-		}
-
-		//Do nothing if the child already belongs to this container.
-		if (in_array($info->getId(), $this->childrenIds, true)) {
-			return;
-		}
-
-		//Set the new child.
 		if ($info->getParentId() !== null) {
 			throw new \RuntimeException("$this has been told to add child $info which already has parent {$info->getParentId()}.");
 		}
 		$info->setParent($this, $notify);
 		$info->setName($name, $notify);
-		$this->childrenIds[$name] = $info->getId();
-		if ($notify) $this->repository->notifyContainerAddedChild($this, $name);
+		$this->setChildId($name, $info->getId(), $notify);
 	}
 
 	/** Sets this container's type. */
