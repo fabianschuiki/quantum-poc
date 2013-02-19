@@ -14,6 +14,7 @@ class ClientRepository extends Repository
 	protected $socket = null;
 	protected $expectedResponses = array();
 	protected $requestId = 1;
+	protected $observers = array();
 
 	/** Establishes a connection to the quantum server. */
 	public function connect()
@@ -110,6 +111,7 @@ class ClientRepository extends Repository
 				$quantum->setString($message->string, false);
 			}
 			echo "SET STRING: $quantum changed string to \"{$quantum->getString()}\"\n";
+			$this->notifyObservers($quantum);
 		}
 
 		// Throw an exception for unsupported messages.
@@ -192,5 +194,35 @@ class ClientRepository extends Repository
 		$request->name = $name;
 		$request->child = $quantum->getChildId($name);
 		$this->socket->writeFrame(new Frame(1, json_encode($request)));
+	}
+
+	/** Adds the given observation callback to the quantum. The callback is
+	 * called whenever the given path of the quantum, or the entire quantum if
+	 * path is null, changes. */
+	public function addObserver(Quantum $quantum, $callback, $path = null)
+	{
+		$obs = new \stdClass;
+		$obs->id = $quantum->getId();
+		$obs->path = $path;
+		$obs->callback = $callback;
+		$this->observers[] = $obs;
+	}
+
+	/** Notifies all observers of the given quantum and path about a change
+	 * that occurred to the quantum. */
+	protected function notifyObservers(Quantum $quantum, $path = null)
+	{
+		foreach ($this->observers as $obs) {
+			if ($quantum->getId() === $obs->id && $path === $obs->path) {
+				call_user_func($obs->callback, $quantum, $path);
+			}
+		}
+	}
+
+	/** Tries to get the quantum at the given path, possible creating casters
+	 * that convert the quantum to an appropriate format. */
+	public function getQuantumWithPath($path)
+	{
+		return null;
 	}
 }

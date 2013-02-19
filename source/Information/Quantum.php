@@ -114,4 +114,13 @@ abstract class Quantum
 	/** Callback function that takes an ID and returns the appropriate
 	 * information quantum or throws an exception if none exists. */
 	static public $resolveIdCallback;
+
+
+	/** Adds the given observation callback to this quantum. The callback is
+	 * called whenever the given path of the quantum, or the entire quantum if
+	 * path is null, changes. */
+	public function addObserver($callback, $path = null)
+	{
+		$this->repository->addObserver($this, $callback, $path);
+	}
 }
