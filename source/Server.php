@@ -177,9 +177,10 @@ class Server
 				//Look up the requested child.
 				$child = null;
 				if (isset($request->path)) {
-					$root = $this->repository->getQuantumWithId(1);
+					$root = $this->repository->getQuantumWithId(0);
 					$child = $root;
 					foreach (explode("/", $request->path) as $name) {
+						if (!$child || strlen($name) == 0) break;
 						$child = $child->getChild($name);
 					}
 				}

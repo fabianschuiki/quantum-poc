@@ -15,6 +15,7 @@ class ClientRepository extends Repository
 	protected $expectedResponses = array();
 	protected $requestId = 1;
 	protected $observers = array();
+	protected $respondedQuantumIds = array();
 
 	/** Establishes a connection to the quantum server. */
 	public function connect()
@@ -94,11 +95,12 @@ class ClientRepository extends Repository
 		// Decode the message.
 		$message = json_decode($frame->getData());
 		$this->expectedResponses = array_diff($this->expectedResponses, array($message->rid));
-		print_r($message);
+		//print_r($message);
 
 		// Handle new information quanta.
 		if ($message->type == "SET") {
-			Information\Serializer::decode($message->iq, $this);
+			$quantum = Information\Serializer::decode($message->iq, $this);
+			$this->respondedQuantumIds[$message->rid] = $quantum->getId();
 			echo "Received a SET message with rid = {$message->rid}\n";
 		}
 
@@ -116,6 +118,7 @@ class ClientRepository extends Repository
 
 		// Throw an exception for unsupported messages.
 		else {
+			print_r($message);
 			throw new \RuntimeException("Received unsupported message {$message->type}.");
 		}
 	}
@@ -223,6 +226,13 @@ class ClientRepository extends Repository
 	 * that convert the quantum to an appropriate format. */
 	public function getQuantumWithPath($path)
 	{
-		return null;
+		$rid = $this->allocRequestId();
+		$request = new \stdClass;
+		$request->rid = $rid;
+		$request->type = "GET";
+		$request->path = $path;
+		$this->socket->writeFrame(new Frame(1, json_encode($request)));
+		$this->waitForResponse($rid);
+		return $this->quanta[$this->respondedQuantumIds[$rid]];
 	}
 }

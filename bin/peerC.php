@@ -8,8 +8,7 @@ $repo = new ClientRepository;
 $repo->connect();
 
 // Get the root information object and get the debug string.
-$root = $repo->getRoot();
-$str = $root->getChild("local");
+$str = $repo->getQuantumWithPath("local");
 
 // Alter the string!
 $str->setString(readline());
