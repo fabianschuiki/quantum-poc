@@ -191,7 +191,6 @@ class Server
 						$child = null;
 					}
 				}
-				$response = new stdClass;
 				if ($child) {
 					$type = (isset($request->as) ? $request->as : $child->getType());
 					if ($type !== $child->getType()) {

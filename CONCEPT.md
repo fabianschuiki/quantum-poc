@@ -87,3 +87,15 @@ Requests the given range of a raw IQ, or the entire data if `range` is omitted.
 - `data`: Replacement data.
 
 For the given raw IQ, replaces the subdata given by `range` (or the entire data if `range` is omitted) with the given replacement `data` block. After a raw IQ has been transmitted through a **SET** message, it should only be altered through this message. This will enable partial updates of other dependent information.
+
+
+General Notes
+-------------
+
+- Services must be able to create container information quanta that contain a list of children with not every child having to be set explicitly. The server will call back the service to provide the child if requested by a client.
+
+- The server handles messages in a handling queue. Certain requests cannot be handled immediately, especially if they depend on a response from another service. These messages are put into a queue that is re-evaluated every time new information comes in.
+
+- Server communication may occur through various protocols, ranging from shared memory segments to socket connections. This ensures flexibility.
+
+- It should be easy to services in a wide variety of languages. These range from PHP or Ruby scripts to fully fledged C, C++, Java or similar programs. E.g.: In order to read Markdown (.md) files properly, a simple PHP converter from Markdown to HTML is enough. If the system has a proper HTML to PDF renderer, the file may be viewed like a fully fledged document with almost no effort.
