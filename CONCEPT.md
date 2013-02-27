@@ -99,3 +99,11 @@ General Notes
 - Server communication may occur through various protocols, ranging from shared memory segments to socket connections. This ensures flexibility.
 
 - It should be easy to services in a wide variety of languages. These range from PHP or Ruby scripts to fully fledged C, C++, Java or similar programs. E.g.: In order to read Markdown (.md) files properly, a simple PHP converter from Markdown to HTML is enough. If the system has a proper HTML to PDF renderer, the file may be viewed like a fully fledged document with almost no effort.
+
+- Communication between client and server should be reduced to a minimum. A client should be able to completely setup an IQ without that procedure generating multiple messages to the server.
+
+- If an image IQ is obtained from a PDF, it should be possible to store this to disk. The exact procedure though is yet to be determined, since the image IQ needs to be serialized properly into a file IQ when storing.
+
+- IQs need to have a good understanding of their path in the information hierarchy.
+
+- Procedures that take a long time should spawn progress information that can be presented to the user in a user interface. If the user stores a large file to disk, or a file to a network location, the bandwidth bottleneck of one of the information links will cause a slow progress. This should somehow be visible to the user. Maybe the server should be able to keep track of and estimate the bandwidth of certain conversions and interactions.
