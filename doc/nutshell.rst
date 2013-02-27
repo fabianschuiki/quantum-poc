@@ -22,7 +22,8 @@ Information quanta need to be shared and synchronized among multiple processes. 
 
 Managing the sharing of information may be achieved through different techniques, all of which the Quantum Server might implement:
 
-### Shared Memory
+Shared Memory
+~~~~~~~~~~~~~
 Entire quanta may be made available to other processes through the use of shared memory segments where the operating system supports it. Upon request, the Quantum Server would make a certain block of memory containing the information accessible to the requesting process. Special security measures must be taken in order to ensure that access to the information is synchronized.
 
 .. note::
@@ -31,7 +32,8 @@ Entire quanta may be made available to other processes through the use of shared
 .. important::
 	One of the major drawbacks of this approach is that shared memory appears to be a deprecated matter. Linux and the like seem to be moving to memory mapped files. This might be an alternative. Skimming through shared memory documentation, it appears that most systems do not allow arbitrarily large memory segments to be shared, which is a grave limitation.
 
-### Sockets
+Sockets
+~~~~~~~
 Quanta may be transported and kept in sync over a socket connection. Each process would keep a copy of the information it uses in its own memory. Messages to/from the server would keep the copies in sync.
 
 .. important::
@@ -71,7 +73,8 @@ An *IMAP* service might spawn mailbox quanta for each of your configured mail ac
 .. caution::
 	If an information quantum is added to a parent quantum that is not backed by some form of storage, this information gets lost when the system reboots. Further investigation is needed whether this might happen at all or whether all quanta need to be backed by storage anyway.
 
-### Further Abstraction
+Further Abstraction
+~~~~~~~~~~~~~~~~~~~
 The beginning of this section detailed how storage might work, yet this mechanisms are visible to the end user. Furthermore, if a program wants to persist an image IQ, the user would still have to organize these things themself.
 
 The operating system, or rather the desktop environment, might want to provide default location for storing certain types of information. For example, it might provide a container for images, music, documents, but also for program configuration files or email accounts. This further distances the program from having to decide where to persist information. Rather than saying *store this data in ".myapp/config"* it might actually tell the operating system to *store this configuration data and name it "config"*. The system (maybe even in cooperation with the user) would then choose the appropriate storage location.
