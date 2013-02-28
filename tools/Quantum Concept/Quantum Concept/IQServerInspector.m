@@ -14,6 +14,7 @@
 #import "IQDataQuantum.h"
 #import "IQStringQuantum.h"
 #import "IQCaster.h"
+#import "IQAppDelegate.h"
 
 @implementation IQServerInspector
 
@@ -142,7 +143,8 @@
 
 - (IBAction)editQuantum:(id)sender
 {
-	
+	IQQuantum *iq = [self.outlineView itemAtRow:self.outlineView.selectedRow];
+	[[NSApp delegate] editQuantum:iq];
 }
 
 - (BOOL)validateMenuItem:(NSMenuItem *)menuItem
@@ -153,7 +155,12 @@
 		return anythingSelected;
 	}
 	if ([menuItem action] == @selector(editQuantum:)) {
-		return anythingSelected;
+		if (anythingSelected) {
+			IQQuantum *iq = [self.outlineView itemAtRow:self.outlineView.selectedRow];
+			return [[NSApp delegate] canEditQuantum:iq];
+		} else {
+			return NO;
+		}
 	}
 	return NO;
 }

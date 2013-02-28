@@ -23,6 +23,9 @@
 		1F6B8A8A16DFCF540028AFB7 /* IQDataQuantum.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A8916DFCF540028AFB7 /* IQDataQuantum.m */; };
 		1F6B8A8D16DFD4820028AFB7 /* IQStringQuantum.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A8C16DFD4820028AFB7 /* IQStringQuantum.m */; };
 		1F6B8A9016DFD5080028AFB7 /* IQDataStringCaster.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A8F16DFD5080028AFB7 /* IQDataStringCaster.m */; };
+		1F6B8A9316DFDA580028AFB7 /* IQEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A9216DFDA580028AFB7 /* IQEditor.m */; };
+		1F6B8A9716DFDCF30028AFB7 /* IQStringEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A9616DFDCF30028AFB7 /* IQStringEditor.m */; };
+		1F6B8A9A16DFE0400028AFB7 /* StringEditor.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1F6B8A9816DFE0400028AFB7 /* StringEditor.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +62,11 @@
 		1F6B8A8C16DFD4820028AFB7 /* IQStringQuantum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQStringQuantum.m; sourceTree = "<group>"; };
 		1F6B8A8E16DFD5080028AFB7 /* IQDataStringCaster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQDataStringCaster.h; sourceTree = "<group>"; };
 		1F6B8A8F16DFD5080028AFB7 /* IQDataStringCaster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQDataStringCaster.m; sourceTree = "<group>"; };
+		1F6B8A9116DFDA580028AFB7 /* IQEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQEditor.h; sourceTree = "<group>"; };
+		1F6B8A9216DFDA580028AFB7 /* IQEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQEditor.m; sourceTree = "<group>"; };
+		1F6B8A9516DFDCF30028AFB7 /* IQStringEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQStringEditor.h; sourceTree = "<group>"; };
+		1F6B8A9616DFDCF30028AFB7 /* IQStringEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQStringEditor.m; sourceTree = "<group>"; };
+		1F6B8A9916DFE0400028AFB7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/StringEditor.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,6 +132,9 @@
 				1F6B8A8216DFC1B50028AFB7 /* IQCaster.m */,
 				1F6B8A7A16DFA5C80028AFB7 /* IQServer.h */,
 				1F6B8A7B16DFA5C80028AFB7 /* IQServer.m */,
+				1F6B8A9116DFDA580028AFB7 /* IQEditor.h */,
+				1F6B8A9216DFDA580028AFB7 /* IQEditor.m */,
+				1F6B8A9416DFDCE30028AFB7 /* Editors */,
 				1F6B8A8416DFC21C0028AFB7 /* Casters */,
 				1F6B8A7716DFA53E0028AFB7 /* IQQuantum.h */,
 				1F6B8A7816DFA53E0028AFB7 /* IQQuantum.m */,
@@ -166,6 +177,16 @@
 				1F6B8A8F16DFD5080028AFB7 /* IQDataStringCaster.m */,
 			);
 			name = Casters;
+			sourceTree = "<group>";
+		};
+		1F6B8A9416DFDCE30028AFB7 /* Editors */ = {
+			isa = PBXGroup;
+			children = (
+				1F6B8A9516DFDCF30028AFB7 /* IQStringEditor.h */,
+				1F6B8A9616DFDCF30028AFB7 /* IQStringEditor.m */,
+				1F6B8A9816DFE0400028AFB7 /* StringEditor.xib */,
+			);
+			name = Editors;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -223,6 +244,7 @@
 				1F6B8A5F16DF9DCA0028AFB7 /* InfoPlist.strings in Resources */,
 				1F6B8A6516DF9DCA0028AFB7 /* Credits.rtf in Resources */,
 				1F6B8A6B16DF9DCA0028AFB7 /* MainMenu.xib in Resources */,
+				1F6B8A9A16DFE0400028AFB7 /* StringEditor.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,6 +267,8 @@
 				1F6B8A8A16DFCF540028AFB7 /* IQDataQuantum.m in Sources */,
 				1F6B8A8D16DFD4820028AFB7 /* IQStringQuantum.m in Sources */,
 				1F6B8A9016DFD5080028AFB7 /* IQDataStringCaster.m in Sources */,
+				1F6B8A9316DFDA580028AFB7 /* IQEditor.m in Sources */,
+				1F6B8A9716DFDCF30028AFB7 /* IQStringEditor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -273,6 +297,14 @@
 				1F6B8A6A16DF9DCA0028AFB7 /* en */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		1F6B8A9816DFE0400028AFB7 /* StringEditor.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1F6B8A9916DFE0400028AFB7 /* en */,
+			);
+			name = StringEditor.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
