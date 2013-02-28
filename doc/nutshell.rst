@@ -13,6 +13,9 @@ System Components
 
 The Information Quantum System may be divided into several components which are detailed in the following sections.
 
+.. image:: Components.pdf
+
+
 Information Sharing
 -------------------
 Information quanta need to be shared and synchronized among multiple processes. This is necessary since a program obtains a quantum from the system and modifies it, after which the system itself must be able to see the changes and execute any required actions. Since the content of an information quanta may change due to a number of external factors, one requirement for the system is that Information Quanta can be edited simultaneously by multiple processes.
@@ -84,6 +87,10 @@ The operating system, or rather the desktop environment, might want to provide d
 
 Decoupling programs from choosing physical storage media simplifies tasks such as moving user data to the Cloud. An operating system might give the user the option to *"Store E-Mail Accounts in the Cloud"*. If the user chooses this option, the OS would simply return a different information container for *email account data container* requests: It might either be in the user's configuration on disk, or in the user's configuration on a network volume.
 
+Server
+------
+Last but not least the Quantum Server is the component that ties all the other together. Clients request and modify information through the server. The server's responsibility is to look up information requested by the client, chaining up converters in order to bring it to the requested format, and returning a new quantum of information.
+
 
 Standardizing Information
 =========================
@@ -92,3 +99,10 @@ Most fundamental information quanta may be standardized. A quantum containing ra
 Slowly and carefully standardizing certain parts of a quantum would allow for high compatibility between modules. Libraries for various programming languages may be written that deal with images, audio, video, text and other common formats. Even certain parts of an application's configuration may be standardized, like a user's browser bookmarks. This would enable the user to use different browsers and still have the same basic bookmarks. Each browser would have the freedom to attach its own custom fields, which may be standardized further down the road if they prove popular.
 
 Adhering to standard information formats should be made as easy as possible such as to encourage developers to actually use these standards. Take the Go programming language as an example here: Simply implementing the right methods means you're implementing an interface. Applied to the IQS: Simply choosing the standard names for your IQ's fields means you're conforming to the standard. Additional information? Just put them in additional fields.
+
+
+Quantum Tree
+------------
+The following graphic visualizes the different information quanta and how they relate to each other.
+
+.. image:: Quanta.pdf
