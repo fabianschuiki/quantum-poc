@@ -8,13 +8,22 @@
 
 #import <Foundation/Foundation.h>
 
-@class IQRepository;
+@class IQServer;
 
 @interface IQServerInspector : NSObject
 
 @property (assign) IBOutlet NSOutlineView *outlineView;
-@property (nonatomic, retain) IQRepository *repository;
+@property (assign) IBOutlet IQServer *server;
+
+@property (assign) IBOutlet NSWindow *castPicker;
+@property (assign) IBOutlet NSPopUpButton *castPopup;
 
 - (id)init;
+
+- (IBAction)castQuantum:(id)sender;
+- (IBAction)editQuantum:(id)sender;
+
+- (IBAction)acceptCast:(id)sender;
+- (IBAction)cancelCast:(id)sender;
 
 @end

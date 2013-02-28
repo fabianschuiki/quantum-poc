@@ -10,6 +10,11 @@
 
 @implementation IQQuantum
 
++ (id)quantum
+{
+	return [[[self alloc] init] autorelease];
+}
+
 - (id)init
 {
 	self = [super init];

@@ -14,6 +14,7 @@
 @property (copy) NSString *type;
 @property (copy) NSString *name;
 
++ (id)quantum;
 - (id)init;
 
 @end

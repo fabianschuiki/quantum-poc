@@ -18,6 +18,11 @@
 		1F6B8A7916DFA53E0028AFB7 /* IQQuantum.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A7816DFA53E0028AFB7 /* IQQuantum.m */; };
 		1F6B8A7C16DFA5C80028AFB7 /* IQServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A7B16DFA5C80028AFB7 /* IQServer.m */; };
 		1F6B8A8016DFAE190028AFB7 /* IQStructureQuantum.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A7F16DFAE190028AFB7 /* IQStructureQuantum.m */; };
+		1F6B8A8316DFC1B50028AFB7 /* IQCaster.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A8216DFC1B50028AFB7 /* IQCaster.m */; };
+		1F6B8A8716DFC2580028AFB7 /* IQFileDataCaster.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A8616DFC2580028AFB7 /* IQFileDataCaster.m */; };
+		1F6B8A8A16DFCF540028AFB7 /* IQDataQuantum.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A8916DFCF540028AFB7 /* IQDataQuantum.m */; };
+		1F6B8A8D16DFD4820028AFB7 /* IQStringQuantum.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A8C16DFD4820028AFB7 /* IQStringQuantum.m */; };
+		1F6B8A9016DFD5080028AFB7 /* IQDataStringCaster.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A8F16DFD5080028AFB7 /* IQDataStringCaster.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +49,16 @@
 		1F6B8A7B16DFA5C80028AFB7 /* IQServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQServer.m; sourceTree = "<group>"; };
 		1F6B8A7E16DFAE190028AFB7 /* IQStructureQuantum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQStructureQuantum.h; sourceTree = "<group>"; };
 		1F6B8A7F16DFAE190028AFB7 /* IQStructureQuantum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQStructureQuantum.m; sourceTree = "<group>"; };
+		1F6B8A8116DFC1B50028AFB7 /* IQCaster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQCaster.h; sourceTree = "<group>"; };
+		1F6B8A8216DFC1B50028AFB7 /* IQCaster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQCaster.m; sourceTree = "<group>"; };
+		1F6B8A8516DFC2580028AFB7 /* IQFileDataCaster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQFileDataCaster.h; sourceTree = "<group>"; };
+		1F6B8A8616DFC2580028AFB7 /* IQFileDataCaster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQFileDataCaster.m; sourceTree = "<group>"; };
+		1F6B8A8816DFCF540028AFB7 /* IQDataQuantum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQDataQuantum.h; sourceTree = "<group>"; };
+		1F6B8A8916DFCF540028AFB7 /* IQDataQuantum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQDataQuantum.m; sourceTree = "<group>"; };
+		1F6B8A8B16DFD4820028AFB7 /* IQStringQuantum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQStringQuantum.h; sourceTree = "<group>"; };
+		1F6B8A8C16DFD4820028AFB7 /* IQStringQuantum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQStringQuantum.m; sourceTree = "<group>"; };
+		1F6B8A8E16DFD5080028AFB7 /* IQDataStringCaster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQDataStringCaster.h; sourceTree = "<group>"; };
+		1F6B8A8F16DFD5080028AFB7 /* IQDataStringCaster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQDataStringCaster.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,8 +120,11 @@
 				1F6B8A7216DF9F0D0028AFB7 /* IQServerInspector.m */,
 				1F6B8A7416DFA2A70028AFB7 /* IQRepository.h */,
 				1F6B8A7516DFA2A70028AFB7 /* IQRepository.m */,
+				1F6B8A8116DFC1B50028AFB7 /* IQCaster.h */,
+				1F6B8A8216DFC1B50028AFB7 /* IQCaster.m */,
 				1F6B8A7A16DFA5C80028AFB7 /* IQServer.h */,
 				1F6B8A7B16DFA5C80028AFB7 /* IQServer.m */,
+				1F6B8A8416DFC21C0028AFB7 /* Casters */,
 				1F6B8A7716DFA53E0028AFB7 /* IQQuantum.h */,
 				1F6B8A7816DFA53E0028AFB7 /* IQQuantum.m */,
 				1F6B8A7D16DFAE060028AFB7 /* Quanta */,
@@ -131,8 +149,23 @@
 			children = (
 				1F6B8A7E16DFAE190028AFB7 /* IQStructureQuantum.h */,
 				1F6B8A7F16DFAE190028AFB7 /* IQStructureQuantum.m */,
+				1F6B8A8816DFCF540028AFB7 /* IQDataQuantum.h */,
+				1F6B8A8916DFCF540028AFB7 /* IQDataQuantum.m */,
+				1F6B8A8B16DFD4820028AFB7 /* IQStringQuantum.h */,
+				1F6B8A8C16DFD4820028AFB7 /* IQStringQuantum.m */,
 			);
 			name = Quanta;
+			sourceTree = "<group>";
+		};
+		1F6B8A8416DFC21C0028AFB7 /* Casters */ = {
+			isa = PBXGroup;
+			children = (
+				1F6B8A8516DFC2580028AFB7 /* IQFileDataCaster.h */,
+				1F6B8A8616DFC2580028AFB7 /* IQFileDataCaster.m */,
+				1F6B8A8E16DFD5080028AFB7 /* IQDataStringCaster.h */,
+				1F6B8A8F16DFD5080028AFB7 /* IQDataStringCaster.m */,
+			);
+			name = Casters;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -207,6 +240,11 @@
 				1F6B8A7916DFA53E0028AFB7 /* IQQuantum.m in Sources */,
 				1F6B8A7C16DFA5C80028AFB7 /* IQServer.m in Sources */,
 				1F6B8A8016DFAE190028AFB7 /* IQStructureQuantum.m in Sources */,
+				1F6B8A8316DFC1B50028AFB7 /* IQCaster.m in Sources */,
+				1F6B8A8716DFC2580028AFB7 /* IQFileDataCaster.m in Sources */,
+				1F6B8A8A16DFCF540028AFB7 /* IQDataQuantum.m in Sources */,
+				1F6B8A8D16DFD4820028AFB7 /* IQStringQuantum.m in Sources */,
+				1F6B8A9016DFD5080028AFB7 /* IQDataStringCaster.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

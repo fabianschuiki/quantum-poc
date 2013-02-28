@@ -19,8 +19,6 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-	// Insert code here to initialize your application
-	[self.serverInspector bind:@"repository" toObject:self.server withKeyPath:@"repository" options:nil];
 }
 
 @end

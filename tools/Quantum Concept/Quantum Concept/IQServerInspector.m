@@ -7,13 +7,17 @@
 //
 
 #import "IQServerInspector.h"
+#import "IQServer.h"
 #import "IQRepository.h"
 #import "IQQuantum.h"
 #import "IQStructureQuantum.h"
+#import "IQDataQuantum.h"
+#import "IQStringQuantum.h"
+#import "IQCaster.h"
 
 @implementation IQServerInspector
 
-@synthesize outlineView, repository;
+@synthesize outlineView, server;
 
 
 - (id)init
@@ -23,16 +27,6 @@
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(quantumChanged:) name:@"IQQuantumChanged" object:nil];
 	}
 	return self;
-}
-
-- (void)setRepository:(IQRepository *)repo
-{
-	if (repo != repository) {
-		[repo retain];
-		[repository autorelease];
-		repository = repo;
-		[outlineView reloadData];
-	}
 }
 
 - (void)quantumChanged:(NSNotification *)notification
@@ -49,7 +43,7 @@
 {
 	// The root level shows all items in the repository.
 	if (!item) {
-		return [repository.quanta objectAtIndex:index];
+		return [server.repository.quanta objectAtIndex:index];
 	}
 	
 	// Sublevels show the children of the respective item.
@@ -70,7 +64,7 @@
 {
 	// The root level shows all items in the repository.
 	if (!item) {
-		return [repository.quanta count];
+		return [server.repository.quanta count];
 	}
 	
 	// Sublevels show the children of the respective item.
@@ -96,10 +90,72 @@
 	else if ([ident isEqualToString:@"details"]) {
 		if ([iq isKindOfClass:[IQStructureQuantum class]]) {
 			return [NSString stringWithFormat:@"%@", iq.type];
+		} else if ([iq isKindOfClass:[IQDataQuantum class]]) {
+			return [NSString stringWithFormat:@"%lu Bytes", [((IQDataQuantum *)iq).data length]];
+		} else if ([iq isKindOfClass:[IQStringQuantum class]]) {
+			NSString *rawString = ((IQStringQuantum *)iq).string;
+			NSString *str = rawString;
+			if ([str length] > 1000) {
+				str = [str stringByReplacingCharactersInRange:NSMakeRange(1000, [str length]-1000) withString:@"…"];
+			}
+			return [NSString stringWithFormat:@"\"%@\"", str];
 		}
 		return [item description];
 	}
 	return nil;
+}
+
+- (IBAction)castQuantum:(id)sender
+{
+	// Make a list of available casts.
+	IQQuantum *iq = [self.outlineView itemAtRow:self.outlineView.selectedRow];
+	NSMenu *menu = self.castPopup.menu;
+	[menu removeAllItems];
+	for (IQCaster *caster in server.casters) {
+		if ([iq.type isEqualToString:caster.input] || [iq.type isEqualToString:caster.output]) {
+			NSString *title = [NSString stringWithFormat:@"%@ ↔ %@", caster.input, caster.output];
+			NSMenuItem *item = [menu addItemWithTitle:title action:NULL keyEquivalent:@""];
+			[item setRepresentedObject:caster];
+		}
+	}
+	
+	[NSApp beginSheet:self.castPicker modalForWindow:self.outlineView.window modalDelegate:nil didEndSelector:NULL contextInfo:nil];
+	[self.castPicker makeKeyAndOrderFront:nil];
+}
+
+- (IBAction)cancelCast:(id)sender
+{
+	[NSApp endSheet:self.castPicker];
+	[self.castPicker close];
+}
+
+- (IBAction)acceptCast:(id)sender
+{
+	IQCaster *caster = self.castPopup.selectedItem.representedObject;
+	IQQuantum *iq = [self.outlineView itemAtRow:self.outlineView.selectedRow];
+	
+	[NSApp endSheet:self.castPicker];
+	[self.castPicker close];
+	
+	[self.server castQuantum:iq with:caster];
+}
+
+- (IBAction)editQuantum:(id)sender
+{
+	
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem
+{
+	BOOL anythingSelected = [outlineView numberOfSelectedRows] > 0;
+	
+	if ([menuItem action] == @selector(castQuantum:)) {
+		return anythingSelected;
+	}
+	if ([menuItem action] == @selector(editQuantum:)) {
+		return anythingSelected;
+	}
+	return NO;
 }
 
 @end
