@@ -86,6 +86,9 @@
 	rel.wrapper = dst;
 	rel.caster = caster;
 	[relations addObject:rel];
+	
+	// Keep the names in sync.
+	[dst bind:@"name" toObject:quantum withKeyPath:@"name" options:nil];
 }
 
 - (void)quantumCommitNotification:(NSNotification *)notification

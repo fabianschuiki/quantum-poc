@@ -106,6 +106,12 @@
 	return nil;
 }
 
+- (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
+{
+	if (![[tableColumn identifier] isEqualToString:@"name"]) return;
+	[(IQQuantum *)item setName:object];
+}
+
 - (IBAction)castQuantum:(id)sender
 {
 	// Make a list of available casts.
