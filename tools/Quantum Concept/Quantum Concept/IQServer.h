@@ -12,10 +12,10 @@
 @class IQQuantum;
 @class IQCaster;
 
-
 @interface IQServer : NSObject
 {
 	NSMutableSet *casters;
+	NSMutableSet *relations;
 }
 
 @property (readonly) IQRepository *repository;

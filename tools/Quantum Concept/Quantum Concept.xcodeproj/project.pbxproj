@@ -26,6 +26,7 @@
 		1F6B8A9316DFDA580028AFB7 /* IQEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A9216DFDA580028AFB7 /* IQEditor.m */; };
 		1F6B8A9716DFDCF30028AFB7 /* IQStringEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A9616DFDCF30028AFB7 /* IQStringEditor.m */; };
 		1F6B8A9A16DFE0400028AFB7 /* StringEditor.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1F6B8A9816DFE0400028AFB7 /* StringEditor.xib */; };
+		1F6B8A9D16DFF66D0028AFB7 /* IQRelation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A9C16DFF66C0028AFB7 /* IQRelation.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +68,8 @@
 		1F6B8A9516DFDCF30028AFB7 /* IQStringEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQStringEditor.h; sourceTree = "<group>"; };
 		1F6B8A9616DFDCF30028AFB7 /* IQStringEditor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQStringEditor.m; sourceTree = "<group>"; };
 		1F6B8A9916DFE0400028AFB7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/StringEditor.xib; sourceTree = "<group>"; };
+		1F6B8A9B16DFF66C0028AFB7 /* IQRelation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQRelation.h; sourceTree = "<group>"; };
+		1F6B8A9C16DFF66C0028AFB7 /* IQRelation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQRelation.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +135,8 @@
 				1F6B8A8216DFC1B50028AFB7 /* IQCaster.m */,
 				1F6B8A7A16DFA5C80028AFB7 /* IQServer.h */,
 				1F6B8A7B16DFA5C80028AFB7 /* IQServer.m */,
+				1F6B8A9B16DFF66C0028AFB7 /* IQRelation.h */,
+				1F6B8A9C16DFF66C0028AFB7 /* IQRelation.m */,
 				1F6B8A9116DFDA580028AFB7 /* IQEditor.h */,
 				1F6B8A9216DFDA580028AFB7 /* IQEditor.m */,
 				1F6B8A9416DFDCE30028AFB7 /* Editors */,
@@ -269,6 +274,7 @@
 				1F6B8A9016DFD5080028AFB7 /* IQDataStringCaster.m in Sources */,
 				1F6B8A9316DFDA580028AFB7 /* IQEditor.m in Sources */,
 				1F6B8A9716DFDCF30028AFB7 /* IQStringEditor.m in Sources */,
+				1F6B8A9D16DFF66D0028AFB7 /* IQRelation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

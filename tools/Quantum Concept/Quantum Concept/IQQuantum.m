@@ -29,4 +29,10 @@
 	return [NSString stringWithFormat:@"%@{%lu, %@}", [super description], self.ID, self.name];
 }
 
+- (void)commit
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:@"IQQuantumCommitted" object:self];
+	NSLog(@"Committing %@", self);
+}
+
 @end

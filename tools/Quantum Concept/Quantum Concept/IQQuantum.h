@@ -17,4 +17,6 @@
 + (id)quantum;
 - (id)init;
 
+- (void)commit;
+
 @end

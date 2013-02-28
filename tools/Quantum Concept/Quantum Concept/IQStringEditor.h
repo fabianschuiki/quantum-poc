@@ -12,4 +12,8 @@
 
 @property (assign) IBOutlet NSTextView *textView;
 
+- (void)updateTextViewContents;
+
+- (IBAction)save:(id)sender;
+
 @end
