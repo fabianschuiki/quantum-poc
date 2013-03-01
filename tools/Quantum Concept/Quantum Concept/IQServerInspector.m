@@ -50,7 +50,7 @@
 	// Sublevels show the children of the respective item.
 	else {
 		if ([item isKindOfClass:[IQStructureQuantum class]]) {
-			return [[[item fields] allValues] objectAtIndex:index];
+			return [item quantumForKey:[[[item fields] allKeys] objectAtIndex:index]];
 		}
 		return nil;
 	}

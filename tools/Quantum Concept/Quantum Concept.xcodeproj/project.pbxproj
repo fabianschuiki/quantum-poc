@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1F00B2EE16E12C2F00CD6B9B /* IQProxyQuantum.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F00B2ED16E12C2F00CD6B9B /* IQProxyQuantum.m */; };
 		1F6B8A5516DF9DCA0028AFB7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1F6B8A5416DF9DCA0028AFB7 /* Cocoa.framework */; };
 		1F6B8A5F16DF9DCA0028AFB7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1F6B8A5D16DF9DCA0028AFB7 /* InfoPlist.strings */; };
 		1F6B8A6116DF9DCA0028AFB7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A6016DF9DCA0028AFB7 /* main.m */; };
@@ -30,6 +31,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1F00B2EC16E12C2F00CD6B9B /* IQProxyQuantum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQProxyQuantum.h; sourceTree = "<group>"; };
+		1F00B2ED16E12C2F00CD6B9B /* IQProxyQuantum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQProxyQuantum.m; sourceTree = "<group>"; };
 		1F6B8A5016DF9DCA0028AFB7 /* Quantum Concept.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Quantum Concept.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1F6B8A5416DF9DCA0028AFB7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		1F6B8A5716DF9DCA0028AFB7 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -169,6 +172,8 @@
 				1F6B8A8916DFCF540028AFB7 /* IQDataQuantum.m */,
 				1F6B8A8B16DFD4820028AFB7 /* IQStringQuantum.h */,
 				1F6B8A8C16DFD4820028AFB7 /* IQStringQuantum.m */,
+				1F00B2EC16E12C2F00CD6B9B /* IQProxyQuantum.h */,
+				1F00B2ED16E12C2F00CD6B9B /* IQProxyQuantum.m */,
 			);
 			name = Quanta;
 			sourceTree = "<group>";
@@ -275,6 +280,7 @@
 				1F6B8A9316DFDA580028AFB7 /* IQEditor.m in Sources */,
 				1F6B8A9716DFDCF30028AFB7 /* IQStringEditor.m in Sources */,
 				1F6B8A9D16DFF66D0028AFB7 /* IQRelation.m in Sources */,
+				1F00B2EE16E12C2F00CD6B9B /* IQProxyQuantum.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -410,6 +416,7 @@
 				1F6B8A7016DF9DCA0028AFB7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

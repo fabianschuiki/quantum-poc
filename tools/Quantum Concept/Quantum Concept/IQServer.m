@@ -13,6 +13,7 @@
 #import "IQStringQuantum.h"
 #import "IQFileDataCaster.h"
 #import "IQDataStringCaster.h"
+#import "IQProxyQuantum.h"
 #import "IQRelation.h"
 
 @implementation IQServer
@@ -39,10 +40,23 @@
 		iq.name = @"world.txt";
 		[_repo addQuantum:iq];
 		
+		iq = [IQStructureQuantum quantum];
+		iq.type = @"directory";
+		iq.name = @"Documents";
+		[iq setProxyWithDelegate:self forKey:@"CV.pdf"];
+		[iq setProxyWithDelegate:self forKey:@"Project.txt"];
+		[_repo addQuantum:iq];
+		
 		// Register for whenever a quantum commits.
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(quantumCommitNotification:) name:@"IQQuantumCommitted" object:nil];
 	}
 	return self;
+}
+
+- (IQQuantum *)resolveProxy:(NSString *)key ofQuantum:(IQStructureQuantum *)parent
+{
+	NSLog(@"Resolving %@", key);
+	return [IQQuantum quantum];
 }
 
 - (NSSet *)casters

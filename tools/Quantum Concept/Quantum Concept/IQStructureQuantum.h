@@ -17,4 +17,8 @@
 
 - (id)init;
 
+- (void)setQuantum:(IQQuantum *)quantum forKey:(NSString *)key;
+- (void)setProxyWithDelegate:(id)delegate forKey:(NSString *)key;
+- (IQQuantum *)quantumForKey:(NSString *)key;
+
 @end
