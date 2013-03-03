@@ -14,7 +14,9 @@
 #import "IQFileDataCaster.h"
 #import "IQDataStringCaster.h"
 #import "IQProxyQuantum.h"
+#import "IQArrayQuantum.h"
 #import "IQRelation.h"
+#import "IQFileSystemService.h"
 
 @implementation IQServer
 
@@ -35,17 +37,34 @@
 		NSLog(@"initialized casters %@", casters);
 		
 		// Add some quantum.
-		IQStructureQuantum *iq = [[IQStructureQuantum alloc] init];
+		IQStructureQuantum *iq = [IQStructureQuantum quantum];
 		iq.type = @"file";
 		iq.name = @"world.txt";
 		[_repo addQuantum:iq];
 		
-		iq = [IQStructureQuantum quantum];
+		/*iq = [IQStructureQuantum quantum];
 		iq.type = @"directory";
 		iq.name = @"Documents";
-		[iq setProxyWithDelegate:self forKey:@"CV.pdf"];
-		[iq setProxyWithDelegate:self forKey:@"Project.txt"];
 		[_repo addQuantum:iq];
+		
+		IQArrayQuantum *aq = [IQArrayQuantum quantum];
+		aq.quantaType = @"file|directory";
+		[iq setQuantum:aq forKey:@"children"];
+		[_repo addQuantum:aq];
+		
+		iq = [IQStructureQuantum quantum];
+		iq.type = @"file";
+		iq.name = @"CV.pdf";
+		[aq addQuantum:iq];
+		[_repo addQuantum:iq];
+		
+		iq = [IQStructureQuantum quantum];
+		iq.type = @"file";
+		iq.name = @"Project.txt";
+		[aq addQuantum:iq];
+		[_repo addQuantum:iq];*/
+		
+		[[IQFileSystemService alloc] initWithServer:self];
 		
 		// Register for whenever a quantum commits.
 		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(quantumCommitNotification:) name:@"IQQuantumCommitted" object:nil];

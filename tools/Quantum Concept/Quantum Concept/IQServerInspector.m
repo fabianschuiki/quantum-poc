@@ -13,6 +13,7 @@
 #import "IQStructureQuantum.h"
 #import "IQDataQuantum.h"
 #import "IQStringQuantum.h"
+#import "IQArrayQuantum.h"
 #import "IQCaster.h"
 #import "IQAppDelegate.h"
 
@@ -34,9 +35,11 @@
 {
 	IQQuantum *quantum = [notification object];
 	if (quantum) {
-		[outlineView reloadItem:quantum];
+		[outlineView performSelector:@selector(reloadItem:) withObject:quantum afterDelay:0];
+		//[outlineView reloadItem:quantum];
 	} else {
-		[outlineView reloadItem:nil];
+		[outlineView performSelector:@selector(reloadItem:) withObject:nil afterDelay:0];
+		//[outlineView reloadItem:nil];
 	}
 }
 
@@ -52,13 +55,21 @@
 		if ([item isKindOfClass:[IQStructureQuantum class]]) {
 			return [item quantumForKey:[[[item fields] allKeys] objectAtIndex:index]];
 		}
+		if ([item isKindOfClass:[IQArrayQuantum class]]) {
+			return [((IQArrayQuantum *)item).quanta objectAtIndex:index];
+		}
 		return nil;
 	}
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
-	return [item isKindOfClass:[IQStructureQuantum class]] && ([[item fields] count] > 0);
+	if ([item isKindOfClass:[IQStructureQuantum class]] && ([[item fields] count] > 0))
+		return YES;
+	if ([item isKindOfClass:[IQArrayQuantum class]] && ([[item quanta] count] > 0))
+		return YES;
+	
+	return NO;
 }
 
 - (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
@@ -72,6 +83,9 @@
 	else {
 		if ([item isKindOfClass:[IQStructureQuantum class]]) {
 			return [[item fields] count];
+		}
+		if ([item isKindOfClass:[IQArrayQuantum class]]) {
+			return [((IQArrayQuantum *)item).quanta count];
 		}
 		return 0;
 	}
@@ -100,6 +114,8 @@
 				str = [str stringByReplacingCharactersInRange:NSMakeRange(1000, [str length]-1000) withString:@"…"];
 			}
 			return [NSString stringWithFormat:@"\"%@\"", str];
+		} else if ([iq isKindOfClass:[IQArrayQuantum class]]) {
+			return [NSString stringWithFormat:@"%lu Quanta, %@", [((IQArrayQuantum *)iq).quanta count], ((IQArrayQuantum *)iq).quantaType];
 		}
 		return [item description];
 	}

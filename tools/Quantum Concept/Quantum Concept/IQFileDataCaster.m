@@ -8,6 +8,8 @@
 
 #import "IQFileDataCaster.h"
 #import "IQDataQuantum.h"
+#import "IQStringQuantum.h"
+#import "IQStructureQuantum.h"
 
 @implementation IQFileDataCaster
 
@@ -17,13 +19,15 @@
 - (void)forwardCast:(id)input to:(id)output
 {
 	NSLog(@"reading file %@", input);
-	[[(IQDataQuantum *)output data] setData:[NSData dataWithContentsOfFile:@"/tmp/iq"]];
+	NSString *path = [(IQStringQuantum *)[(IQStructureQuantum *)input quantumForKey:@"path"] string];
+	[[(IQDataQuantum *)output data] setData:[NSData dataWithContentsOfFile:path]];
 }
 
 - (void)backwardCast:(id)output to:(id)input
 {
 	NSLog(@"writing file %@", input);
-	[[output data] writeToFile:@"/tmp/iq" atomically:NO];
+	NSString *path = [(IQStringQuantum *)[(IQStructureQuantum *)input quantumForKey:@"path"] string];
+	[[output data] writeToFile:path atomically:NO];
 }
 
 @end
