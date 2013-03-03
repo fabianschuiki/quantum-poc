@@ -32,7 +32,7 @@
 		
 		IQStringQuantum *path = [IQStringQuantum quantum];
 		[path.string setString:@"/"];
-		//[server.repository addQuantum:path];
+		[server.repository addQuantum:path];
 		[root setQuantum:path forKey:@"path"];
 	}
 	return self;
@@ -46,7 +46,7 @@
 	
 	IQArrayQuantum *children = [IQArrayQuantum quantum];
 	children.quantaType = @"file|directory";
-	//[server.repository addQuantum:children];
+	[server.repository addQuantum:children];
 	
 	// Fill in the children.
 	NSFileManager *fm = [NSFileManager defaultManager];
@@ -58,12 +58,12 @@
 		
 		IQStructureQuantum *q = [IQStructureQuantum quantum];
 		q.name = name;
-		//[server.repository addQuantum:q];
+		[server.repository addQuantum:q];
 		[children addQuantum:q];
 		
 		IQStringQuantum *pq = [IQStringQuantum quantum];
 		[pq.string setString:subpath];
-		//[server.repository addQuantum:pq];
+		[server.repository addQuantum:pq];
 		[q setQuantum:pq forKey:@"path"];
 		
 		if (isDirectory) {

@@ -30,6 +30,7 @@
 		1F6B8A9D16DFF66D0028AFB7 /* IQRelation.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F6B8A9C16DFF66C0028AFB7 /* IQRelation.m */; };
 		1F9E0F2416E38DB8006D3C86 /* IQArrayQuantum.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F9E0F2316E38DB8006D3C86 /* IQArrayQuantum.m */; };
 		1F9E0F2816E3920A006D3C86 /* IQFileSystemService.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F9E0F2716E3920A006D3C86 /* IQFileSystemService.m */; };
+		1F9E0F2B16E39ABD006D3C86 /* IQTreeBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 1F9E0F2A16E39ABD006D3C86 /* IQTreeBrowser.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +80,8 @@
 		1F9E0F2316E38DB8006D3C86 /* IQArrayQuantum.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQArrayQuantum.m; sourceTree = "<group>"; };
 		1F9E0F2616E3920A006D3C86 /* IQFileSystemService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQFileSystemService.h; sourceTree = "<group>"; };
 		1F9E0F2716E3920A006D3C86 /* IQFileSystemService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQFileSystemService.m; sourceTree = "<group>"; };
+		1F9E0F2916E39ABD006D3C86 /* IQTreeBrowser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IQTreeBrowser.h; sourceTree = "<group>"; };
+		1F9E0F2A16E39ABD006D3C86 /* IQTreeBrowser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = IQTreeBrowser.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +141,8 @@
 				1F6B8A5B16DF9DCA0028AFB7 /* Supporting Files */,
 				1F6B8A7116DF9F0D0028AFB7 /* IQServerInspector.h */,
 				1F6B8A7216DF9F0D0028AFB7 /* IQServerInspector.m */,
+				1F9E0F2916E39ABD006D3C86 /* IQTreeBrowser.h */,
+				1F9E0F2A16E39ABD006D3C86 /* IQTreeBrowser.m */,
 				1F6B8A7416DFA2A70028AFB7 /* IQRepository.h */,
 				1F6B8A7516DFA2A70028AFB7 /* IQRepository.m */,
 				1F6B8A8116DFC1B50028AFB7 /* IQCaster.h */,
@@ -293,6 +298,7 @@
 				1F00B2EE16E12C2F00CD6B9B /* IQProxyQuantum.m in Sources */,
 				1F9E0F2416E38DB8006D3C86 /* IQArrayQuantum.m in Sources */,
 				1F9E0F2816E3920A006D3C86 /* IQFileSystemService.m in Sources */,
+				1F9E0F2B16E39ABD006D3C86 /* IQTreeBrowser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
