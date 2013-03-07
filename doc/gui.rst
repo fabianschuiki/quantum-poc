@@ -1,0 +1,6 @@
+Quantum User Interface
+======================
+
+The concept of having small, modular information quanta may also be applied to user interfaces in an operating system. Today, a program creates one or more windows to provide functionality. A text editor, IDE and LaTeX editor all provide their own source code editor. This redundancy could be omitted if programs could ask the operating system for an editor for a specific type of information, and the operating system would provide a process that takes over the rendering of a portion of the window.
+
+In order for this to work, some concepts of current GUI toolkits need to be altered. At the moment, a window usually has a set of buttons and menus that adapt to the context of what the user is currently editing. If they're typing in the text editor, most menu commands will be routed to it. If they're modifying the project file hierarchy, commands will be routed to a different location. If the UI is to me modularized, menus and toolbars need to be able to adapt properly to whatever modules are loaded. This might require moving all menus inside the module, or dynamically gathering all menu commands into one single root menu. Or having menus that appear dynamically when editing inside one module.

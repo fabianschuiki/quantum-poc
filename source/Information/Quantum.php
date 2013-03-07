@@ -9,35 +9,55 @@ namespace Information;
 
 abstract class Quantum
 {
+	protected $repository;
 	protected $id;
 	protected $parentId;
 	protected $name;
 
-	public function __construct($id)
+	/** Initializes a new information quantum inside the given repository. If
+	 * no ID is provided, a new local ID is allocated from the repository. */
+	public function __construct(\Repository $repo, $id = null)
 	{
+		$this->repository = $repo;
+		if ($id === null) {
+			$id = $repo->allocId($this);
+		}
 		$this->id = $id;
+		$repo->addQuantum($this);
 	}
 
 	public function __toString()
 	{
-		return "<{$this->getType()} #{$this->id} \"{$this->getName()}\">";
+		return "<{$this->getType()} #{$this->getId()} \"{$this->getName()}\">";
 	}
 
 	abstract public function getType();
 
-	/** Returns the quantum's id. */
+	/** Returns the quantum's id. Allocates a new ID for the quantum if none
+	 * has been set yet. */
 	public function getId() { return $this->id; }
+
+	/** Alters this quantum's ID, informing the repository about the change.
+	 * You should never have to call this function. */
+	public function setId($id)
+	{
+		if ($this->id != $id) {
+			echo "Changing $this ID to $id\n";
+			$this->repository->changeId($this->id, $id);
+			$this->id = $id;
+		}
+	}
 
 	/** Returns the quantum's parentId. */
 	public function getParentId() { return $this->parentId; }
 
 	/** Changes the quantum's parentId, thus issuing an information change
 	 * event. */
-	public function setParentId($id)
+	public function setParentId($id, $notify = true)
 	{
 		if ($this->parentId !== $id) {
 			$this->parentId = $id;
-			$this->notifyChange();
+			if ($notify) $this->notifyChange();
 		}
 	}
 
@@ -51,9 +71,9 @@ abstract class Quantum
 
 	/** Changes the quantum's parent. This will in fact adjust this quantum's
 	 * parentId and issue an information change event. */
-	public function setParent(self $parent = null)
+	public function setParent(self $parent = null, $notify = true)
 	{
-		$this->setParentId($parent ? $parent->getId() : null);
+		$this->setParentId($parent ? $parent->getId() : null, $notify);
 	}
 
 	/** Returns this information quantum's name. In general, if this quantum is
@@ -62,11 +82,11 @@ abstract class Quantum
 
 	/** Sets the quantum's name. You should never have to call this yourself.
 	 * Whenever the quantum is added to a container, its name is adjusted. */
-	public function setName($name)
+	public function setName($name, $notify = true)
 	{
 		if ($this->name !== $name) {
 			$this->name = $name;
-			$this->notifyChange();
+			if ($notify) $this->notifyChange();
 		}
 	}
 
@@ -87,10 +107,20 @@ abstract class Quantum
 	 * ID. This will usually use the standard resolve callback of the class. */
 	protected function resolveId($id)
 	{
-		return call_user_func(static::$resolveIdCallback, $id);
+		//return call_user_func(static::$resolveIdCallback, $id);
+		return $this->repository->getQuantumWithId($id);
 	}
 
 	/** Callback function that takes an ID and returns the appropriate
 	 * information quantum or throws an exception if none exists. */
 	static public $resolveIdCallback;
+
+
+	/** Adds the given observation callback to this quantum. The callback is
+	 * called whenever the given path of the quantum, or the entire quantum if
+	 * path is null, changes. */
+	public function addObserver($callback, $path = null)
+	{
+		$this->repository->addObserver($this, $callback, $path);
+	}
 }

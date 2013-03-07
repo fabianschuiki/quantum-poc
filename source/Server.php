@@ -1,15 +1,15 @@
 <?php
 /* Copyright © 2013 Fabian Schuiki */
 
-/**
- * Main server class that maintains information quanta and handles requests
- * and information conversion.
- */
-
 define("kStringFrameType", 1);
 define("kIntegerFrameType", 2);
 define("kRequestQuantumFrameType", 200);
 define("kRequestQuantumResponseFrameType", 201);
+
+/**
+ * Main server class that maintains information quanta and handles requests
+ * and information conversion.
+ */
 
 class Server
 {
@@ -21,6 +21,7 @@ class Server
 	protected $quantumId;
 	protected $casters;
 	protected $editorStack;
+	protected $repository;
 
 	public function __construct($socketPath)
 	{
@@ -30,13 +31,16 @@ class Server
 		$this->quantumId = 1;
 		$this->casters = array();
 		$this->editorStack = array();
+		$this->repository = new Repository;
 
 		//Register a default information quantum ID resolver.
 		Information\Quantum::$resolveIdCallback = array($this, "resolveQuantumId");
 
 		//Initialize the root information quantum.
-		$root = $this->makeQuantum("Information\Container");
+		$root = new Information\Container($this->repository, 0);
+		//$root = $this->makeQuantum("Information\Container");
 		$root->setType("root");
+		echo "Initialized $root\n";
 
 		//Create a simple file quantum that wraps around a file on disk.
 		$file = $this->makeQuantum("Information\Container");
@@ -49,6 +53,9 @@ class Server
 		//Load the initial file contents.
 		$this->notifyChangeDown($file, "");
 
+		//Test the serializer.
+		file_put_contents("/tmp/quantum-serializer.json", Information\Serializer::encode($content));
+
 		//Register the information quantum change callback.
 		Information\Quantum::$changeCallback = array($this, "notifyQuantumChanged");
 	}
@@ -57,17 +64,13 @@ class Server
 	 * quantum does not exist. */
 	public function resolveQuantumId($id)
 	{
-		$quantum = @$this->quanta[$id];
-		if (!$quantum) {
-			throw new \InvalidArgumentException("Quantum $id does not exist.");
-		}
-		return $quantum;
+		return $this->repository->getQuantumWithId($id);
 	}
 
 	/** Returns a new and empty information quantum. */
 	public function makeQuantum($class = "Information\Quantum")
 	{
-		$iq = new $class($this->quantumId++);
+		$iq = new $class($this->repository);
 		if (isset($this->quanta[$iq->getId()])) {
 			throw new \RuntimeException ("Information quantum {$iq->getId()} already exists. This shouldn't happen.");
 		}
@@ -92,10 +95,10 @@ class Server
 
 		//Accept incoming connections.
 		do {
-			$getSocketFunc = function($c){ return $c->getSocket(); };
+			$getSocketFunc = function($c){ return $c->socket->getSocket(); };
 			$r = array_map($getSocketFunc, $this->clients);
 			$w = array_map($getSocketFunc, array_filter($this->clients, function($c){
-				return $c->wantsToWrite();
+				return $c->socket->wantsToWrite();
 			}));
 			$e = null;
 			$r[] = $this->socket;
@@ -108,15 +111,17 @@ class Server
 				$client = socket_accept($this->socket);
 				if (!$client)
 					throw new \RuntimeError("Unable to accept connection.");
-				$this->clients[] = new FrameSocket ($client, array($this, "serveClient"));
+				$c = new Server\Client;
+				$c->socket = new FrameSocket ($client, array($this, "serveClient"));
+				$this->clients[] = $c;
 				echo "Client connected.\n";
 			}
 
 			//Handle client communication.
 			foreach ($this->clients as $client) {
 				//Reading.
-				if (in_array($client->getSocket(), $r, true)) {
-					if (!$client->read()) {
+				if (in_array($client->socket->getSocket(), $r, true)) {
+					if (!$client->socket->read()) {
 						echo "Client disconnected.\n";
 						$this->clients = array_filter($this->clients, function($c) use ($client) {
 							return $c !== $client;
@@ -126,110 +131,163 @@ class Server
 				}
 
 				//Writing.
-				if (in_array($client->getSocket(), $w, true)) {
-					$client->write();
+				if (in_array($client->socket->getSocket(), $w, true)) {
+					$client->socket->write();
 				}
 			}
 		} while (true);
 	}
 
-	public function serveClient(Frame $frame, FrameSocket $client)
+	/** Handles frames received from a certain client. */
+	public function serveClient(Frame $frame, FrameSocket $socket)
 	{
-		//Decoce the request ID first.
-		$input = $frame->getData();
-		$requestID = static::consumeAndDecodeFrameData($input);
-		if (!is_integer($requestID)) {
-			echo "*** Client sent request {$frame->getType()} without a request ID\n";
-			break;
+		if ($frame->getType() === 255) {
+			echo "Client sent error: {$frame->getData()}\n";
+			return;
+		}
+		if ($frame->getType() != 1) {
+			echo "Client sent frame $frame, but only frames of type 1 and 255 are supported.\n";
+			$this->respondWithError($client, "Frame type {$frame->getType()} not supported.");
+			return;
 		}
 
-		//Decode the request.
-		switch ($frame->getType()) {
-			case kRequestQuantumFrameType: {
-				if (strlen($frame->getData()) == 0) {
-					echo "-> root quantum requested\n";
-				} else {
-					$data = static::consumeAndDecodeFrameData($input);
-					$quantum = null;
-					if (is_integer($data)) {
-						echo "-> quantum with ID $data requested\n";
-						$quantum = @$this->quanta[$data];
-					} else {
-						echo "-> quantum at path $data requested\n";
-						$quantum = $this->quanta[1];
-						foreach (explode("/", $data) as $name) {
-							if (!$quantum) break;
-							$quantum = $quantum->getChild($name);
-						}
-					}
-
-					//Return the quantum or an error it didn't exist.
-					$response = $this->encodeFrame($requestID)->serialize();
-					if ($quantum) {
-						$response .= $this->encodeFrame($quantum)->serialize();
-					} else {
-						$f = new Frame (255, "Quantum $data does not exist");
-						$response .= $f->serialize();
-					}
-					$client->writeFrame(new Frame (kRequestQuantumResponseFrameType, $response));
-				}
-			} break;
-			default: {
-				$this->respondWithError($client, "Request type {$frame->getType()} is not supported");
-				echo "*** Client sent unsupported request type {$frame->getType()}\n";
-			} break;
+		//Find the client associated with this socket.
+		$client = null;
+		foreach ($this->clients as $c) {
+			if ($c->socket === $socket) {
+				$client = $c;
+				break;
+			}
+		}
+		if (!$client) {
+			throw new \InvalidArgumentException("Socket does not belong to any known client.");
 		}
 
-		/*switch ($request->type) {
+		//Decode the JSON data in the frame.
+		$request = json_decode($frame->getData());
+		if (!$request) {
+			echo "Client sent invalid JSON data: {$frame->getData()}\n";
+			return;
+		}
+
+		//Handle the request.
+		print_r($request);
+		switch ($request->type) {
 			case "GET": {
-				$root = $this->quanta[1];
-				$child = $root;
-				foreach (explode("/", $request->path) as $name) {
-					$child = $child->getChild($name);
+				//Look up the requested child.
+				$child = null;
+				if (isset($request->path)) {
+					$root = $this->repository->getQuantumWithId(0);
+					$child = $root;
+					foreach (explode("/", $request->path) as $name) {
+						if (!$child || strlen($name) == 0) break;
+						$child = $child->getChild($name);
+					}
 				}
-				$response = new stdClass;
+				if (isset($request->id)) {
+					try {
+						$child = $this->repository->getQuantumWithId($request->id);	
+					} catch (\Exception $e) {
+						$child = null;
+					}
+				}
 				if ($child) {
 					$type = (isset($request->as) ? $request->as : $child->getType());
 					if ($type !== $child->getType()) {
 						$caster = $this->getCaster($child, $type);
 						if (!$caster) {
-							$response->type = "FAIL";
-							$response->message = "Information quantum {$request->path} of type {$child->getType()} cannot be converted to {$request->as}.";
+							$this->respondWithError($socket, "Information quantum {$request->path} of type {$child->getType()} cannot be converted to {$request->as}.");
 							$child = null;
 						} else {
 							$child = $caster->getOutput();
 						}
 					}
 					if ($child) {
-						$response->type = "QUANTUM";
-						$response->payload = $child;
+						$response = new \stdClass;
+						$response->rid = $request->rid;
+						$response->type = "SET";
+						$response->iq = Information\Serializer::encode($child, $client->downstreamMapping);
+						$socket->writeFrame(new Frame (1, json_encode($response)));
+						$client->knownIds[] = $child->getId();
 					}
 				} else {
-					$response->type = "FAIL";
-					$response->message = "Information quantum {$request->path} doesn't exist.";
+					$this->respondWithError($socket, "Information quantum {$request->path} doesn't exist.");
 				}
-				socket_write($client, serialize($response));
 			} break;
+
+			/* Allows clients to transfer a new information quantum to the
+			 * server. The server needs to create an entry for the local id in
+			 * the ID translation map and add the quantum to the repository. */
 			case "SET": {
-				if (!$request->payload instanceof Information\Quantum) {
-					echo "Payload is no information quantum.";
-					print_r($request);
-					break;
+				$quantum = Information\Serializer::decode($request->iq, $this->repository, $client->upstreamMapping);
+				$localId = $quantum->getId();
+				$globalId = $this->repository->allocId();
+				echo "Mapping $globalId <-> $localId\n";
+				$quantum->setId($globalId);
+				$client->upstreamMapping->add($localId, $globalId);
+				$client->downstreamMapping->add($localId, $globalId);
+				$client->knownIds[] = $globalId;
+			} break;
+
+			case "SET STRING": {
+				try {
+					$id = $client->upstreamMapping->getGlobalId($request->id);
+					echo "SET STRING: $id ({$request->id})\n";
+					$quantum = $this->repository->getQuantumWithId($id);
+					if (isset($request->range)) {
+						$quantum->replaceString($request->string, $request->range[0], $request->range[1], false);
+					} else {
+						$quantum->setString($request->string, false);
+					}
+					echo "SET STRING: $id now is {$quantum->getString()}\n";
+
+					//Send the change downstream to all other clients that are interested.
+					foreach ($this->clients as $c) {
+						if ($client === $c) continue;
+						if (in_array($quantum->getId(), $c->knownIds)) {
+							$message = clone $request;
+							$message->rid = 0;
+							$message->id = $c->downstreamMapping->getLocalId($id);
+							$c->socket->writeFrame(new Frame(1, json_encode($message)));
+						}
+					}
 				}
-				$this->quanta[$request->payload->getId()] = $request->payload;
-				$this->pushEditor($client);
-				$this->notifyChange($request->payload, "");
-				$this->popEditor($client);
+				catch (\Exception $e) {
+					$this->respondWithError($socket, $e->getMessage());
+				}
 			} break;
+
+			case "SET CHILD": {
+				try {
+					$id = $client->upstreamMapping->getGlobalId($request->id);
+					echo "SET CHILD: $id.{$request->name} ({$request->id})\n";
+					$quantum = $this->repository->getQuantumWithId($id);
+					$child = $client->upstreamMapping->getGlobalId($request->child);
+					$quantum->setChildId($request->name, $child, false);
+					echo "SET CHILD: $id now has children ".print_r($quantum->getChildIds(), true);
+				}
+				catch (\Exception $e) {
+					$this->respondWithError($socket, $e->getMessage());
+				}
+			} break;
+
 			default: {
-				echo "Request type \"{$request->type}\" is not supported.\n";
+				$this->respondWithError($socket, "Request type {$request->type} is not supported.");
 			} break;
-		}*/
+		}
 	}
 
 	private function respondWithError(FrameSocket $client, $message)
 	{
 		$client->writeFrame(new Frame (255, $message));
+	}
+
+	private function respondWithDone(FrameSocket $client, $rid)
+	{
+		$response = new \stdClass;
+		$response->rid = $rid;
+		$response->type = "DONE";
+		$client->writeFrame(new Frame (1, json_encode($response)));
 	}
 
 	private function notifyChange(Information\Quantum $quantum, $path = "")

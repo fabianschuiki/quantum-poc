@@ -9,13 +9,21 @@ namespace Information;
 
 class Container extends Quantum
 {
-	protected $childrenIds;
+	protected $childrenIds = array();
 	protected $type;
 
-	public function __construct($id)
+	/** Returns an associative array of name-id pairs of all children of this
+	 * container. */
+	public function getChildIds()
 	{
-		parent::__construct($id);
-		$this->childrenIds = array();
+		return $this->childrenIds;
+	}
+
+	/** Sets the associative array of name-id pairs of all children of this
+	 * container. You should never have to call this method directly. */
+	public function setChildIds(array $ids)
+	{
+		$this->childrenIds = $ids;
 	}
 
 	/** Returns the child id for the given name, or null if it doesn't exist. */
@@ -28,9 +36,25 @@ class Container extends Quantum
 	 * the given name. Resolves the id first before adding the child, since the
 	 * child's parentId needs to be adjusted. Issues an information change
 	 * event. */
-	public function setChildId($name, $id)
+	public function setChildId($name, $id, $notify = true)
 	{
-		$this->setChild($name, $this->resolveId($id));
+		//Do nothing if the child already belongs to this container.
+		if (in_array($id, $this->childrenIds, true)) {
+			return;
+		}
+
+		//Remove the existing child.
+		if ($childId = $this->getChildId($name)) {
+			$child = $this->resolveId($childId);
+			if ($child->getParentId() != $this->getId()) {
+				throw new \RuntimeException("$this has child $child that has the wrong parent ID {$child->getParentId()}.");
+			}
+			$child->setParentId(null, $notify);
+		}
+
+		//Set the new child.
+		$this->childrenIds[$name] = $id;
+		if ($notify) $this->repository->notifyContainerAddedChild($this, $name);
 	}
 
 	/** Returns the child information quantum with the given name, or null if
@@ -43,30 +67,14 @@ class Container extends Quantum
 
 	/** Adds the given information quantum to this quantum's children for the
 	 * given name. Issues an information change event. */
-	public function setChild($name, Quantum $info)
+	public function setChild($name, Quantum $info, $notify = true)
 	{
-		//Remove the existing child.
-		if ($childId = $this->getChildId($name)) {
-			$child = $this->resolveId($childId);
-			if ($child->getParentId() != $this->getId()) {
-				throw new \RuntimeException("$this has child $child that has the wrong parent ID {$child->getParentId()}.");
-			}
-			$child->setParentId(null);
-		}
-
-		//Do nothing if the child already belongs to this container.
-		if (in_array($info->getId(), $this->childrenIds, true)) {
-			return;
-		}
-
-		//Set the new child.
 		if ($info->getParentId() !== null) {
 			throw new \RuntimeException("$this has been told to add child $info which already has parent {$info->getParentId()}.");
 		}
-		$info->setParent($this);
-		$info->setName($name);
-		$this->childrenIds[$name] = $info->getId();
-		$this->notifyChange();
+		$info->setParent($this, $notify);
+		$info->setName($name, $notify);
+		$this->setChildId($name, $info->getId(), $notify);
 	}
 
 	/** Sets this container's type. */

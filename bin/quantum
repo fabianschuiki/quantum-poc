@@ -1,0 +1,75 @@
+#!/usr/bin/php
+<?php
+/* Copyright © 2013 Fabian Schuiki */
+require_once __DIR__."/../source/autoload.php";
+
+//Get the path to the information quantum the user wants to edit.
+if ($argc < 2) {
+	echo "usage: {$argv[0]} COMMAND ...
+
+Valid commands are:
+   show <path>  Shows the given information quantum, i.e. its name, type and in
+                case of a container, its children. 
+";
+	exit;
+}
+
+//Create the client repository for server communication.
+$repo = new ClientRepository;
+$repo->connect();
+
+//Execute the command.
+switch ($argv[1]) {
+	/* Show command */
+	case "show": {
+		if ($argc < 3) {
+			echo "usage: {$argv[0]} show <path>\n";
+			exit;
+		}
+
+		//Fetch the object at the given path.
+		$iq = $repo->getQuantumWithPath($argv[2]);
+		if ($iq) {
+			echo describeQuantum($iq, 1)."\n";
+		} else {
+			die("Quantum {$argv[2]} does not exist.\n");
+		}
+	} break;
+}
+
+/** Returns a string printable to the console that describes the given quantum. */
+function describeQuantum(Information\Quantum $quantum, $depth = null)
+{
+	if ($quantum instanceof Information\String) {
+		return "\033[0;33m\"{$quantum->getString()}\"\033[0m";
+	}
+	if ($quantum instanceof Information\Raw) {
+		$str = "[\n";
+		$i = 0;
+		$data = $quantum->getData();
+		for ($y = 0; $i < strlen($data); $y++) {
+			$str .= "    ";
+			for ($x = 0; $x < 8 && $i < strlen($data); $x++) {
+				if ($x !== 0) $str .= " ";
+				$str .= sprintf("%02x", $data[$i++]);
+			}
+			$str .= "\n";
+		}
+		$str .= "]";
+		return $str;
+	}
+	if ($quantum instanceof Information\Container) {
+		$str = "\033[1;32m{$quantum->getType()}\033[0m";
+		if ($depth === null || $depth > 0) {
+			$str .= " {\n";
+			foreach ($quantum->getChildIds() as $name => $id) {
+				$str .= "    $name: ";
+				$str .= str_replace("\n", "\n    ", describeQuantum($quantum->getChild($name), $depth !== null ? $depth-1 : null));
+				$str .= "\n";
+			}
+			$str .= "}";
+		}
+		return $str;
+	}
+	return "$quantum";
+}
